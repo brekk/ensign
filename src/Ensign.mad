@@ -1,78 +1,91 @@
-import type { Parser } from "Parse"
+import type { Maybe } from "Maybe"
 
-import { gt } from "Compare"
-import { identity, ifElse, when } from "Function"
-import IO from "IO"
+import { ifElse, when } from "Function"
 import List from "List"
 import { Just, Nothing } from "Maybe"
-import { anyChar, char, choice, eof, someTill, string } from "Parse"
 import String from "String"
-import { fromList, trim } from "String"
 
 
 
-type Flag = FlagOn(String) | FlagOff(String) | Flag(String, String)
-isStringFlag = String.startsWith("--")
-isNegated = String.startsWith("--no-")
-isShortFlag = String.startsWith("-")
-isFlag = (x) => isShortFlag(x) || isStringFlag(x) || isNegated(x)
+export type Flag = FlagOn(String) | FlagOff(String) | Flag(String, String)
 
-export type Specific
-  = Name(String)
-  | Description(String)
-  | Ignore(String)
-  | Repo(String)
-  | UseAliases(Boolean)
+isStringFlag :: String -> Boolean
+export isStringFlag = String.startsWith("--")
 
-splitJointFlags = (x) => String.includes('=', x)
-  ? String.split("=", x)
-  : isShortFlag(x) && !isStringFlag(x)
-    ? pipe(
-      String.drop(1),
-      String.split(""),
-      map(mappend("-")),
-    )(x)
-    : of(x)
+isNegated :: String -> Boolean
+export isNegated = String.startsWith("--no-")
 
-handleMultipleBooleanFlags = (stack, x) => List.concat(
-  stack,
+isShortFlag :: String -> Boolean
+export isShortFlag = String.startsWith("-")
+
+isFlag :: String -> Boolean
+export isFlag = (x) => isShortFlag(x) || isStringFlag(x) || isNegated(x)
+
+cleanFlag :: String -> String
+export cleanFlag = when(
+  isFlag,
+  ifElse(isNegated, String.drop(5), ifElse(isStringFlag, String.drop(2), String.drop(1))),
+)
+
+splitJointFlags :: String -> List String
+export splitJointFlags = (x) => if (String.includes('=', x)) {
+  String.split("=", x)
+} else if (isShortFlag(x) && !isStringFlag(x)) {
+  pipe(
+    String.drop(1),
+    String.split(""),
+    map(mappend("-")),
+  )(x)
+} else {
+  of(x)
+}
+
+handleMultipleBooleanFlags :: List Flag -> List String -> List Flag
+export handleMultipleBooleanFlags = (stack, x) => pipe(
   map(
     pipe(
       String.drop(1),
       FlagOn,
     ),
-    x,
   ),
-)
+  List.concat(stack),
+)(x)
 
-handleStringFlag = (stack, curr, fixed) => where(List.nth(0, curr)) {
+handleStringFlag :: List Flag -> List String -> String -> List Flag
+export handleStringFlag = (stack, curr, fixed) => where(List.nth(0, curr)) {
   Just(firstCurr) =>
-    !isFlag(firstCurr) ? List.append(Flag(fixed, firstCurr), stack) : stack
+    if (!isFlag(firstCurr)) {
+      List.append(Flag(fixed, firstCurr), stack)
+    } else {
+      stack
+    }
 
   _ =>
     stack
 }
 
+handleBooleanFlag :: List Flag -> String -> String -> List Flag
+export handleBooleanFlag = (stack, prev, fixed) => if (!isFlag(prev)) {
+  stack
+} else {
+  List.append((isNegated(prev) ? FlagOff : FlagOn)(fixed), stack)
+}
 
-handleBooleanFlag = (stack, prev, fixed) => !isFlag(prev)
-  ? stack
-  : List.append((isNegated(prev) ? FlagOff : FlagOn)(fixed), stack)
 
-cleanFlag = ifElse(isNegated, String.drop(5), ifElse(isStringFlag, String.drop(2), String.drop(1)))
-
-handleOtherFlags = (stack, prev, current) => do {
+handleOtherFlags :: List Flag -> String -> List String -> List Flag
+export handleOtherFlags = (stack, prev, current) => {
   fixed = cleanFlag(prev)
   currentIsSingle = List.length(current) == 1
-  return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) do {
-    return if (isNegated(prev)) {
+  return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) {
+    if (isNegated(prev)) {
       List.append(FlagOff(fixed), stack)
     } else if (currentIsSingle) {
       handleStringFlag(stack, current, fixed)
     } else {
       stack
     }
-  } else do {
-    return where(List.nth(0, current)) {
+  } else {
+    where(List.nth(0, current)) {
       Just(firstCurr) =>
         handleBooleanFlag(stack, prev, fixed)
 
@@ -82,31 +95,23 @@ handleOtherFlags = (stack, prev, current) => do {
   }
 }
 
-updateStack = (stack, maybePrevious, current) => where(maybePrevious) {
+updateStack :: List Flag -> Maybe (List String) -> List String -> List Flag
+export updateStack = (stack, maybePrevious, current) => where(maybePrevious) {
   Just(previous) =>
-    do {
-      previousIsSingle = List.length(previous) == 1
-      previousIsPair = List.length(previous) == 2
-      return if (!previousIsSingle && !previousIsPair) {
-        handleMultipleBooleanFlags(stack, previous)
-      } else if (previousIsPair) {
-        where(previous) {
-          [k, v] =>
-            isFlag(k) && !isFlag(v)
-              ? List.append(Flag(cleanFlag(k), v), stack)
-              : handleMultipleBooleanFlags(stack, previous)
+    if (List.length(previous) > 2) {
+      handleMultipleBooleanFlags(stack, previous)
+    } else {
+      where(previous) {
+        [k, v] =>
+          isFlag(k) && !isFlag(v)
+            ? List.append(Flag(cleanFlag(k), v), stack)
+            : handleMultipleBooleanFlags(stack, previous)
 
-          _ =>
-            stack
-        }
-      } else {
-        where(List.nth(0, previous)) {
-          Just(x) =>
-            handleOtherFlags(stack, x, current)
+        [x] =>
+          handleOtherFlags(stack, x, current)
 
-          Nothing =>
-            stack
-        }
+        _ =>
+          stack
       }
     }
 

@@ -1,0 +1,153 @@
+import { Just, Nothing } from "Maybe"
+
+import {
+  Flag,
+  FlagOff,
+  FlagOn,
+  cleanFlag,
+  convertFlags,
+  handleBooleanFlag,
+  handleMultipleBooleanFlags,
+  handleOtherFlags,
+  handleStringFlag,
+  isFlag,
+  isNegated,
+  isShortFlag,
+  isStringFlag,
+  splitJointFlags,
+  updateStack,
+} from "@/Ensign"
+import { caseN2, caseN3, report } from "@/Test"
+
+
+
+report(
+  isStringFlag,
+  "isStringFlag",
+  [#["--cool", true], #["-", false], #["--", true], #["", false]],
+)
+
+report(
+  isNegated,
+  "isNegated",
+  [#["--no-cool", true], #["-", false], #["--", false], #["", false], #["--hey", false]],
+)
+
+report(
+  isShortFlag,
+  "isShortFlag",
+  [
+    #["--no-cool", true],
+    #["-", true],
+    #["--", true],
+    #["", false],
+    #["--hey", true],
+    #["-n", true],
+  ],
+)
+
+report(
+  isFlag,
+  "isFlag",
+  [
+    #["--no-cool", true],
+    #["-", true],
+    #["--", true],
+    #["", false],
+    #["--hey", true],
+    #["-n", true],
+    #["nooo", false],
+  ],
+)
+
+report(
+  splitJointFlags,
+  "splitJointFlags",
+  [
+    #["-zipzap", ["-z", "-i", "-p", "-z", "-a", "-p"]],
+    #["--hey=yo", ["--hey", "yo"]],
+    #["whatever", ["whatever"]],
+  ],
+)
+
+report(
+  caseN2(handleMultipleBooleanFlags),
+  "handleMultipleBooleanFlags",
+  [#[#[[], ["-nice"]], [FlagOn("nice")]]],
+)
+
+report(
+  caseN3(handleStringFlag),
+  "handleStringFlag",
+  [
+    #[#[[], ["--nice"], "cool"], []],
+    #[#[[FlagOff("nah"), FlagOn("whatever")], [], "cool"], [FlagOff("nah"), FlagOn("whatever")]],
+    #[#[[FlagOff("nope")], ["hey"], "cool"], [FlagOff("nope"), Flag("cool", "hey")]],
+  ],
+)
+
+report(
+  caseN3(handleBooleanFlag),
+  "handleBooleanFlag",
+  [
+    #[#[[], "--nice", "cool"], [FlagOn("cool")]],
+    #[#[[FlagOff("hey")], "no", ""], [FlagOff("hey")]],
+    #[#[[FlagOff("hey")], "--no-nope", "zip"], [FlagOff("hey"), FlagOff("zip")]],
+  ],
+)
+
+report(
+  cleanFlag,
+  "cleanFlag",
+  [#["--dope", "dope"], #["--no-doy", "doy"], #["-h", "h"], #["x", "x"]],
+)
+
+report(
+  caseN3(handleOtherFlags),
+  "handleOtherFlags",
+  [
+    #[#[[FlagOn("ale")], "beer", []], [FlagOn("ale")]],
+    #[#[[FlagOn("mead")], "--dope", []], [FlagOn("mead")]],
+    #[#[[FlagOn("drank")], "-h", ["test"]], [FlagOn("drank"), Flag("h", "test")]],
+    #[#[[FlagOff("nein")], "--no-good", ["test"]], [FlagOff("nein"), FlagOff("good")]],
+    #[#[[FlagOff("nope")], "xyz", ["-abc"]], [FlagOff("nope")]],
+  ],
+)
+
+report(
+  caseN3(updateStack),
+  "updateStack",
+  [
+    #[#[[], Just([]), []], []],
+    #[#[[], Nothing, []], []],
+    #[#[[], Just(["--crap", "hey"]), []], [Flag("crap", "hey")]],
+    #[#[[], Just(["-a", "-b", "-c"]), []], [FlagOn("a"), FlagOn("b"), FlagOn("c")]],
+    #[#[[], Just(["-a", "-b"]), []], [FlagOn("a"), FlagOn("b")]],
+    #[#[[], Just(["cool"]), []], []],
+    #[
+      #[[], Just(["-cool", "-dope", "-nice"]), []],
+      [FlagOn("cool"), FlagOn("dope"), FlagOn("nice")],
+    ],
+  ],
+)
+
+report(
+  convertFlags,
+  "convertFlags",
+  [
+    #[
+      ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
+      [
+        Flag("a", "alpha"),
+        FlagOn("b"),
+        FlagOn("c"),
+        FlagOn("d"),
+        FlagOn("e"),
+        FlagOff("dope"),
+        Flag("cool", "information"),
+        Flag("shit", "yes"),
+        Flag("d", "30"),
+      ],
+    ],
+  ],
+)

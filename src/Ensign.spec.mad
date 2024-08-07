@@ -5,7 +5,6 @@ import {
   FlagOff,
   FlagOn,
   cleanFlag,
-  convertFlags,
   handleBooleanFlag,
   handleMultipleBooleanFlags,
   handleOtherFlags,
@@ -14,6 +13,7 @@ import {
   isNegated,
   isShortFlag,
   isStringFlag,
+  parseFlags,
   splitJointFlags,
   updateStack,
 } from "@/Ensign"
@@ -132,8 +132,8 @@ report(
 )
 
 report(
-  convertFlags,
-  "convertFlags",
+  parseFlags,
+  "parseFlags",
   [
     #[
       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],

@@ -119,8 +119,8 @@ export updateStack = (stack, maybePrevious, current) => where(maybePrevious) {
     stack
 }
 
-convertFlags :: List String -> List Flag
-export convertFlags = pipe(
+parseFlags :: List String -> List Flag
+export parseFlags = pipe(
   map(splitJointFlags),
   (steps) => List.reduce(
     (agg, curr) => ({ prev: Just(curr), stack: updateStack(agg.stack, agg.prev, curr) }),

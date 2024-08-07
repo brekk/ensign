@@ -1,0 +1,8 @@
+{
+  "name": "ensign",
+  "version": "0.0.1",
+  "main": "src/Ensign.mad",
+  "importAliases": {
+    ".": "src"
+  }
+}

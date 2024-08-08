@@ -1,0 +1,43 @@
+import type { Flag } from "@/Flags"
+
+import Dict from "Dictionary"
+import { reduce } from "List"
+
+import { Flag, FlagToggle } from "@/Flags"
+
+
+
+export type FlagKind = FlagString(String) | FlagBoolean(Boolean) | FlagIndeterminate
+
+export alias CliApi = {
+  keyed :: Dictionary (List String) String,
+  on :: Dictionary (List String) Boolean,
+}
+
+export type ApiFlag = ApiFlag(List String, FlagKind)
+
+flag :: List String -> String -> ApiFlag
+export flag = (aliases, x) => ApiFlag(aliases, FlagString(x))
+
+toggle :: List String -> Boolean -> ApiFlag
+export toggle = (aliases, x) => ApiFlag(aliases, FlagBoolean(x))
+
+flaggable :: List String -> ApiFlag
+export flaggable = ApiFlag($, FlagIndeterminate)
+
+consumeFlags :: List ApiFlag -> CliApi
+export consumeFlags = (expected) => pipe(
+  reduce(
+    (agg, x) => where(x) {
+      ApiFlag(aliases, FlagString(str)) =>
+        ({ ...agg, keyed: Dict.insert(aliases, str, agg.keyed) })
+
+      ApiFlag(aliases, FlagBoolean(bool)) =>
+        ({ ...agg, on: Dict.insert(aliases, bool, agg.on) })
+
+      _ =>
+        agg
+    },
+    { on: {{}}, keyed: {{}} },
+  ),
+)(expected)

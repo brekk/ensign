@@ -1,132 +1,26 @@
-import type { Maybe } from "Maybe"
+import type { Flag } from "@/Flags"
 
-import { ifElse, when } from "Function"
-import List from "List"
-import { Just, Nothing } from "Maybe"
-import String from "String"
-
-
-
-export type Flag = FlagOn(String) | FlagOff(String) | Flag(String, String)
-
-isStringFlag :: String -> Boolean
-export isStringFlag = String.startsWith("--")
-
-isNegated :: String -> Boolean
-export isNegated = String.startsWith("--no-")
-
-isShortFlag :: String -> Boolean
-export isShortFlag = String.startsWith("-")
-
-isFlag :: String -> Boolean
-export isFlag = (x) => isShortFlag(x) || isStringFlag(x) || isNegated(x)
-
-cleanFlag :: String -> String
-export cleanFlag = when(
+import {
+  Flag,
+  FlagToggle,
+  cleanFlag,
   isFlag,
-  ifElse(isNegated, String.drop(5), ifElse(isStringFlag, String.drop(2), String.drop(1))),
-)
-
-splitJointFlags :: String -> List String
-export splitJointFlags = (x) => if (String.includes('=', x)) {
-  String.split("=", x)
-} else if (isShortFlag(x) && !isStringFlag(x)) {
-  pipe(
-    String.drop(1),
-    String.split(""),
-    map(mappend("-")),
-  )(x)
-} else {
-  of(x)
-}
-
-handleMultipleBooleanFlags :: List Flag -> List String -> List Flag
-export handleMultipleBooleanFlags = (stack, x) => pipe(
-  map(
-    pipe(
-      String.drop(1),
-      FlagOn,
-    ),
-  ),
-  List.concat(stack),
-)(x)
-
-handleStringFlag :: List Flag -> List String -> String -> List Flag
-export handleStringFlag = (stack, curr, fixed) => where(List.nth(0, curr)) {
-  Just(firstCurr) =>
-    if (!isFlag(firstCurr)) {
-      List.append(Flag(fixed, firstCurr), stack)
-    } else {
-      stack
-    }
-
-  _ =>
-    stack
-}
-
-handleBooleanFlag :: List Flag -> String -> String -> List Flag
-export handleBooleanFlag = (stack, prev, fixed) => if (!isFlag(prev)) {
-  stack
-} else {
-  List.append((isNegated(prev) ? FlagOff : FlagOn)(fixed), stack)
-}
+  isNegatedFlag,
+  isShortFlag,
+  isStringFlag,
+  parseFlags,
+} from "@/Flags"
 
 
-handleOtherFlags :: List Flag -> String -> List String -> List Flag
-export handleOtherFlags = (stack, prev, current) => {
-  fixed = cleanFlag(prev)
-  currentIsSingle = List.length(current) == 1
-  return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) {
-    if (isNegated(prev)) {
-      List.append(FlagOff(fixed), stack)
-    } else if (currentIsSingle) {
-      handleStringFlag(stack, current, fixed)
-    } else {
-      stack
-    }
-  } else {
-    where(List.nth(0, current)) {
-      Just(firstCurr) =>
-        handleBooleanFlag(stack, prev, fixed)
 
-      _ =>
-        stack
-    }
-  }
-}
+export type Flag
 
-updateStack :: List Flag -> Maybe (List String) -> List String -> List Flag
-export updateStack = (stack, maybePrevious, current) => where(maybePrevious) {
-  Just(previous) =>
-    if (List.length(previous) > 2) {
-      handleMultipleBooleanFlags(stack, previous)
-    } else {
-      where(previous) {
-        [k, v] =>
-          isFlag(k) && !isFlag(v)
-            ? List.append(Flag(cleanFlag(k), v), stack)
-            : handleMultipleBooleanFlags(stack, previous)
 
-        [x] =>
-          handleOtherFlags(stack, x, current)
-
-        _ =>
-          stack
-      }
-    }
-
-  Nothing =>
-    stack
-}
-
-parseFlags :: List String -> List Flag
-export parseFlags = pipe(
-  map(splitJointFlags),
-  (steps) => List.reduce(
-    (agg, curr) => ({ prev: Just(curr), stack: updateStack(agg.stack, agg.prev, curr) }),
-    { stack: [], prev: List.nth(0, steps) },
-    // stuff an empty value at the end so we process all entries
-    List.append([], List.tail(steps)),
-  ),
-  .stack,
-)
+export Flag
+export FlagToggle
+export cleanFlag
+export isFlag
+export isNegatedFlag
+export isShortFlag
+export isStringFlag
+export parseFlags

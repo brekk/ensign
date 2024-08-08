@@ -2,21 +2,20 @@ import { Just, Nothing } from "Maybe"
 
 import {
   Flag,
-  FlagOff,
-  FlagOn,
+  FlagToggle,
   cleanFlag,
   handleBooleanFlag,
   handleMultipleBooleanFlags,
   handleOtherFlags,
   handleStringFlag,
   isFlag,
-  isNegated,
+  isNegatedFlag,
   isShortFlag,
   isStringFlag,
   parseFlags,
   splitJointFlags,
   updateStack,
-} from "@/Ensign"
+} from "@/Flags"
 import { caseN2, caseN3, report } from "@/Test"
 
 
@@ -28,8 +27,8 @@ report(
 )
 
 report(
-  isNegated,
-  "isNegated",
+  isNegatedFlag,
+  "isNegatedFlag",
   [#["--no-cool", true], #["-", false], #["--", false], #["", false], #["--hey", false]],
 )
 
@@ -73,7 +72,7 @@ report(
 report(
   caseN2(handleMultipleBooleanFlags),
   "handleMultipleBooleanFlags",
-  [#[#[[], ["-nice"]], [FlagOn("nice")]]],
+  [#[#[[], ["-nice"]], [FlagToggle(true, "nice")]]],
 )
 
 report(
@@ -81,8 +80,14 @@ report(
   "handleStringFlag",
   [
     #[#[[], ["--nice"], "cool"], []],
-    #[#[[FlagOff("nah"), FlagOn("whatever")], [], "cool"], [FlagOff("nah"), FlagOn("whatever")]],
-    #[#[[FlagOff("nope")], ["hey"], "cool"], [FlagOff("nope"), Flag("cool", "hey")]],
+    #[
+      #[[FlagToggle(false, "nah"), FlagToggle(true, "whatever")], [], "cool"],
+      [FlagToggle(false, "nah"), FlagToggle(true, "whatever")],
+    ],
+    #[
+      #[[FlagToggle(false, "nope")], ["hey"], "cool"],
+      [FlagToggle(false, "nope"), Flag("cool", "hey")],
+    ],
   ],
 )
 
@@ -90,9 +95,12 @@ report(
   caseN3(handleBooleanFlag),
   "handleBooleanFlag",
   [
-    #[#[[], "--nice", "cool"], [FlagOn("cool")]],
-    #[#[[FlagOff("hey")], "no", ""], [FlagOff("hey")]],
-    #[#[[FlagOff("hey")], "--no-nope", "zip"], [FlagOff("hey"), FlagOff("zip")]],
+    #[#[[], "--nice", "cool"], [FlagToggle(true, "cool")]],
+    #[#[[FlagToggle(false, "hey")], "no", ""], [FlagToggle(false, "hey")]],
+    #[
+      #[[FlagToggle(false, "hey")], "--no-nope", "zip"],
+      [FlagToggle(false, "hey"), FlagToggle(false, "zip")],
+    ],
   ],
 )
 
@@ -106,11 +114,17 @@ report(
   caseN3(handleOtherFlags),
   "handleOtherFlags",
   [
-    #[#[[FlagOn("ale")], "beer", []], [FlagOn("ale")]],
-    #[#[[FlagOn("mead")], "--dope", []], [FlagOn("mead")]],
-    #[#[[FlagOn("drank")], "-h", ["test"]], [FlagOn("drank"), Flag("h", "test")]],
-    #[#[[FlagOff("nein")], "--no-good", ["test"]], [FlagOff("nein"), FlagOff("good")]],
-    #[#[[FlagOff("nope")], "xyz", ["-abc"]], [FlagOff("nope")]],
+    #[#[[FlagToggle(true, "ale")], "beer", []], [FlagToggle(true, "ale")]],
+    #[#[[FlagToggle(true, "mead")], "--dope", []], [FlagToggle(true, "mead")]],
+    #[
+      #[[FlagToggle(true, "drank")], "-h", ["test"]],
+      [FlagToggle(true, "drank"), Flag("h", "test")],
+    ],
+    #[
+      #[[FlagToggle(false, "nein")], "--no-good", ["test"]],
+      [FlagToggle(false, "nein"), FlagToggle(false, "good")],
+    ],
+    #[#[[FlagToggle(false, "nope")], "xyz", ["-abc"]], [FlagToggle(false, "nope")]],
   ],
 )
 
@@ -121,12 +135,15 @@ report(
     #[#[[], Just([]), []], []],
     #[#[[], Nothing, []], []],
     #[#[[], Just(["--crap", "hey"]), []], [Flag("crap", "hey")]],
-    #[#[[], Just(["-a", "-b", "-c"]), []], [FlagOn("a"), FlagOn("b"), FlagOn("c")]],
-    #[#[[], Just(["-a", "-b"]), []], [FlagOn("a"), FlagOn("b")]],
+    #[
+      #[[], Just(["-a", "-b", "-c"]), []],
+      [FlagToggle(true, "a"), FlagToggle(true, "b"), FlagToggle(true, "c")],
+    ],
+    #[#[[], Just(["-a", "-b"]), []], [FlagToggle(true, "a"), FlagToggle(true, "b")]],
     #[#[[], Just(["cool"]), []], []],
     #[
       #[[], Just(["-cool", "-dope", "-nice"]), []],
-      [FlagOn("cool"), FlagOn("dope"), FlagOn("nice")],
+      [FlagToggle(true, "cool"), FlagToggle(true, "dope"), FlagToggle(true, "nice")],
     ],
   ],
 )
@@ -139,11 +156,11 @@ report(
       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
       [
         Flag("a", "alpha"),
-        FlagOn("b"),
-        FlagOn("c"),
-        FlagOn("d"),
-        FlagOn("e"),
-        FlagOff("dope"),
+        FlagToggle(true, "b"),
+        FlagToggle(true, "c"),
+        FlagToggle(true, "d"),
+        FlagToggle(true, "e"),
+        FlagToggle(false, "dope"),
         Flag("cool", "information"),
         Flag("shit", "yes"),
         Flag("d", "30"),

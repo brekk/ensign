@@ -1,0 +1,21 @@
+import { includes } from "List"
+
+
+
+dropEq :: Eq a => a -> List a -> List a
+export dropEq = (needle, haystack) => where(haystack) {
+  [a, ...z] =>
+    a == needle ? dropEq(needle, z) : [a, ...dropEq(needle, z)]
+
+  _ =>
+    []
+}
+
+without :: Eq a => List a -> List a -> List a
+export without = (needles, haystack) => where(haystack) {
+  [a, ...z] =>
+    includes(a, needles) ? without(needles, z) : [a, ...without(needles, z)]
+
+  _ =>
+    []
+}

@@ -1,0 +1,26 @@
+import String from "String"
+
+import { dropEq, without } from "@/List"
+import { caseN2, report } from "@/Test"
+
+
+
+report(
+  caseN2(dropEq),
+  "dropEq",
+  [
+    #[#["a", String.split("", "banana")], ["b", "n", "n"]],
+    #[#["a", String.split("", "effigy")], String.split("", "effigy")],
+  ],
+)
+
+report(
+  caseN2(without),
+  "without",
+  [
+    #[
+      #[["a", "e", "i", "o", "u"], String.split("", "drop many matches!")],
+      String.split("", "drp mny mtchs!"),
+    ],
+  ],
+)

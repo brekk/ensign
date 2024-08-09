@@ -7,37 +7,38 @@ import { Flag, FlagToggle } from "@/Flags"
 
 
 
-export type FlagKind = FlagString(String) | FlagBoolean(Boolean) | FlagIndeterminate
+export type FlagKind = FString | FBoolean
 
-export alias CliApi = {
-  keyed :: Dictionary (List String) String,
-  on :: Dictionary (List String) Boolean,
+export alias MatchedDictionary = {
+  keyed :: Dictionary String String,
+  on :: Dictionary String Boolean,
 }
 
-export type ApiFlag = ApiFlag(List String, FlagKind)
+export type DeclaredFlag = DeclaredFlag(List String, FlagKind)
+export type ApiFlag = ApiFlag(List String, Flag)
 
-flag :: List String -> String -> ApiFlag
-export flag = (aliases, x) => ApiFlag(aliases, FlagString(x))
+flag :: List String -> DeclaredFlag
+export flag = DeclaredFlag($, FString)
 
-toggle :: List String -> Boolean -> ApiFlag
-export toggle = (aliases, x) => ApiFlag(aliases, FlagBoolean(x))
+toggle :: List String -> DeclaredFlag
+export toggle = DeclaredFlag($, FBoolean)
 
-flaggable :: List String -> ApiFlag
-export flaggable = ApiFlag($, FlagIndeterminate)
+// consumeFlags :: List ApiFlag -> CliApi
+// export consumeFlags = (expected) => pipe(
+//   reduce(
+//     (agg, x) => where(x) {
+//       ApiFlag(aliases, MatchedString(str)) =>
+//         ({ ...agg, keyed: Dict.insert(aliases, str, agg.keyed) })
+//
+//       ApiFlag(aliases, MatchedBoolean(bool)) =>
+//         ({ ...agg, on: Dict.insert(aliases, bool, agg.on) })
+//     },
+//     { on: {{}}, keyed: {{}} },
+//   ),
+// )(expected)
 
-consumeFlags :: List ApiFlag -> CliApi
-export consumeFlags = (expected) => pipe(
-  reduce(
-    (agg, x) => where(x) {
-      ApiFlag(aliases, FlagString(str)) =>
-        ({ ...agg, keyed: Dict.insert(aliases, str, agg.keyed) })
-
-      ApiFlag(aliases, FlagBoolean(bool)) =>
-        ({ ...agg, on: Dict.insert(aliases, bool, agg.on) })
-
-      _ =>
-        agg
-    },
-    { on: {{}}, keyed: {{}} },
-  ),
-)(expected)
+saveAliases :: List DeclaredFlag -> Dictionary String #[List String, FlagKind]
+export saveAliases = pipe(
+  chain(where { DeclaredFlag(aliases, kind) => map((a) => #[a, #[aliases, kind]], aliases) }),
+  Dict.fromList,
+)

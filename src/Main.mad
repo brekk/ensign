@@ -1,0 +1,53 @@
+import Dict from "Dictionary"
+import IO from "IO"
+import List from "List"
+import { Just, Nothing } from "Maybe"
+
+import { Flag, FlagToggle, parseFlags } from "@/Flags"
+import { without } from "@/List"
+import {
+  DeclaredFlag,
+  FBoolean,
+  FString,
+  // consumeFlags,
+  flag,
+  saveAliases,
+  toggle,
+} from "@/Signatory"
+
+
+
+main = (args) => {
+  PROGRAM_FLAGS = [
+    toggle(["aliases", "a"]),
+    toggle(["git", "g"]),
+    toggle(["log", "l"]),
+    flag(["description", "desc", "d"]),
+    flag(["ignore", "i"]),
+    flag(["name", "n"]),
+    flag(["repo", "r"]),
+    flag(["template", "t"]),
+  ]
+  flaggy = pipe(
+    saveAliases,
+    IO.pTrace("DICTIONARY!"),
+  )(PROGRAM_FLAGS)
+  pipe(
+    parseFlags,
+    List.reduce(
+      (agg, x) => where(x) {
+        Flag(key, value) =>
+          Dict.includes(key, flaggy)
+            ? ({ on: agg.on, keyed: Dict.insert(key, value, agg.keyed) })
+            : agg
+
+        FlagToggle(value, key) =>
+          Dict.includes(key, flaggy)
+            ? ({ on: Dict.insert(key, value, agg.on), keyed: agg.keyed })
+            : agg
+      },
+      { on: {{}}, keyed: {{}} },
+    ),
+    IO.pTrace("output!"),
+  )(args)
+}

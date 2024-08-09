@@ -5,20 +5,20 @@ import { Just, Nothing } from "Maybe"
 
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
 import { without } from "@/List"
-import { aliased, createLegend, saveAliases } from "@/Signatory"
+import { createLegend, flagBoolean, flagString, saveAliases } from "@/Signatory"
 
 
 
 main = (args) => {
   PROGRAM_FLAGS = [
-    aliased("aliases", ["a"]),
-    aliased("git", ["g"]),
-    aliased("log", ["l"]),
-    aliased("description", ["desc", "d"]),
-    aliased("ignore", ["i"]),
-    aliased("name", ["n"]),
-    aliased("repo", ["r"]),
-    aliased("template", ["t"]),
+    flagBoolean("aliases", ["a"]),
+    flagBoolean("git", ["g"]),
+    flagBoolean("log", ["l"]),
+    flagString("description", ["desc", "d"]),
+    flagString("ignore", ["i"]),
+    flagString("name", ["n"]),
+    flagString("repo", ["r"]),
+    flagString("template", ["t"]),
   ]
   pipe(
     parseFlags,

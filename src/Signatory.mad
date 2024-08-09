@@ -1,9 +1,12 @@
+import type { Either } from "Either"
 import type { Maybe } from "Maybe"
 
 import type { Flag } from "@/Flags"
 
 import Dict from "Dictionary"
-import { append, reduce } from "List"
+import { Left, Right, fromRight } from "Either"
+import IO from "IO"
+import { append, length, reduce } from "List"
 import { Just, Nothing } from "Maybe"
 
 import { Flag, FlagToggle } from "@/Flags"
@@ -15,50 +18,66 @@ export alias MatchedDictionary = {
   on :: Dictionary String Boolean,
 }
 
+export type FlagKind = FString | FBoolean
+
 // primary key, aliases
-export type DeclaredFlag = DeclaredFlag(String, List String)
+export type DeclaredFlag = DeclaredFlag(String, List String, FlagKind)
 
 export aliased = DeclaredFlag
-export declare = DeclaredFlag($, [])
+export flagString = DeclaredFlag($, $, FString)
+export flagBoolean = DeclaredFlag($, $, FBoolean)
 
-structureAliases :: String -> List String -> List #[String, String]
-export structureAliases = (key, aliases) => pipe(
+structureAliases :: String -> List String -> FlagKind -> List #[String, #[String, FlagKind]]
+export structureAliases = (key, aliases, kind) => pipe(
   append(key),
-  map((a) => #[a, key]),
+  map((a) => #[a, #[key, kind]]),
 )(aliases)
 
-saveAliases :: List DeclaredFlag -> Dictionary String String
+saveAliases :: List DeclaredFlag -> Dictionary String #[String, FlagKind]
 export saveAliases = pipe(
-  chain(where { DeclaredFlag(key, aliases) => structureAliases(key, aliases) }),
+  chain(where { DeclaredFlag(key, aliases, kind) => structureAliases(key, aliases, kind) }),
   Dict.fromList,
 )
 
-createLegend :: List DeclaredFlag -> List Flag -> MatchedDictionary
+type Invalid = ExpectedBoolean(String) | ExpectedString(String) | UnexpectedFlag(String)
+
+createLegend :: List DeclaredFlag -> List Flag -> Either (List Invalid) MatchedDictionary
 export createLegend = (decls, provided) => {
   known = saveAliases(decls)
-  return reduce(
-    (agg, x) => where(x) {
-      Flag(key, value) =>
-        where(Dict.get(key, known)) {
-          Just(primary) =>
-            ({ on: agg.on, keyed: Dict.insert(primary, value, agg.keyed) })
+  return pipe(
+    reduce(
+      (agg, x) => {
+        IO.pTrace("...issues?", agg.issues)
+        return where(x) {
+          Flag(key, value) =>
+            where(Dict.get(key, known)) {
+              Just(#[primary, FString]) =>
+                ({ ...agg, keyed: Dict.insert(primary, value, agg.keyed) })
 
-          _ =>
-            agg
+              Just(#[primary, FBoolean]) =>
+                ({ ...agg, issues: [...agg.issues, ExpectedString(primary)] })
+
+              _ =>
+                ({ ...agg, issues: [...agg.issues, UnexpectedFlag(key)] })
+            }
+
+          FlagToggle(value, key) =>
+            where(Dict.get(key, known)) {
+              Just(#[primary, FBoolean]) =>
+                ({ ...agg, on: Dict.insert(primary, value, agg.on) })
+
+              Just(#[primary, FString]) =>
+                ({ ...agg, issues: [...agg.issues, ExpectedBoolean(primary)] })
+
+              _ =>
+                ({ ...agg, issues: [...agg.issues, UnexpectedFlag(key)] })
+            }
         }
-
-      FlagToggle(value, key) =>
-        where(Dict.get(key, known)) {
-          Just(primary) =>
-            ({ on: Dict.insert(primary, value, agg.on), keyed: agg.keyed })
-
-          _ =>
-            agg
-        }
-    },
-    { on: {{}}, keyed: {{}} },
-    provided,
-  )
+      },
+      { on: {{}}, keyed: {{}}, issues: [] },
+    ),
+    (raw) => length(raw.issues) > 0 ? Left(raw.issues) : Right({ on: raw.on, keyed: raw.keyed }),
+  )(provided)
 }
 
 getFlag :: String -> MatchedDictionary -> Maybe String

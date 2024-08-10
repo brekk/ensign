@@ -45,37 +45,51 @@ createLegend :: List DeclaredFlag -> List Flag -> Either (List Invalid) MatchedD
 export createLegend = (decls, provided) => {
   known = saveAliases(decls)
   return pipe(
+    IO.pTrace("PROVIDED"),
     reduce(
       (agg, x) => {
         IO.pTrace("...issues?", agg.issues)
         return where(x) {
           Flag(key, value) =>
-            where(Dict.get(key, known)) {
+            where(IO.pTrace("getting " ++ key ++ "...", Dict.get(key, known))) {
               Just(#[primary, FString]) =>
-                ({ ...agg, keyed: Dict.insert(primary, value, agg.keyed) })
+                ({ on: agg.on, issues: agg.issues, keyed: Dict.insert(primary, value, agg.keyed) })
 
               Just(#[primary, FBoolean]) =>
-                ({ ...agg, issues: [...agg.issues, ExpectedString(primary)] })
+                (
+                  {
+                    on: agg.on,
+                    keyed: agg.keyed,
+                    issues: append(ExpectedString(primary), agg.issues),
+                  }
+                )
 
-              _ =>
-                ({ ...agg, issues: [...agg.issues, UnexpectedFlag(key)] })
+              Nothing =>
+                ({ on: agg.on, keyed: agg.keyed, issues: append(UnexpectedFlag(key), agg.issues) })
             }
 
-          FlagToggle(value, key) =>
-            where(Dict.get(key, known)) {
+          FlagToggle(key, value) =>
+            where(IO.pTrace("getting " ++ key ++ "...", Dict.get(key, known))) {
               Just(#[primary, FBoolean]) =>
-                ({ ...agg, on: Dict.insert(primary, value, agg.on) })
+                ({ keyed: agg.keyed, issues: agg.issues, on: Dict.insert(primary, value, agg.on) })
 
               Just(#[primary, FString]) =>
-                ({ ...agg, issues: [...agg.issues, ExpectedBoolean(primary)] })
+                (
+                  {
+                    on: agg.on,
+                    keyed: agg.keyed,
+                    issues: append(ExpectedBoolean(primary), agg.issues),
+                  }
+                )
 
-              _ =>
-                ({ ...agg, issues: [...agg.issues, UnexpectedFlag(key)] })
+              Nothing =>
+                ({ on: agg.on, keyed: agg.keyed, issues: append(UnexpectedFlag(key), agg.issues) })
             }
         }
       },
       { on: {{}}, keyed: {{}}, issues: [] },
     ),
+    IO.pTrace("uhhh"),
     (raw) => length(raw.issues) > 0 ? Left(raw.issues) : Right({ on: raw.on, keyed: raw.keyed }),
   )(provided)
 }

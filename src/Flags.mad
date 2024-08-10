@@ -1,13 +1,14 @@
 import type { Maybe } from "Maybe"
 
 import { ifElse, when } from "Function"
+import IO from "IO"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 import String from "String"
 
 
 
-export type Flag = FlagToggle(Boolean, String) | Flag(String, String)
+export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
 
 isStringFlag :: String -> Boolean
 export isStringFlag = String.startsWith("--")
@@ -45,7 +46,7 @@ export handleMultipleBooleanFlags = (stack, x) => pipe(
   map(
     pipe(
       String.drop(1),
-      FlagToggle(true),
+      FlagToggle($, true),
     ),
   ),
   List.concat(stack),
@@ -68,54 +69,70 @@ handleBooleanFlag :: List Flag -> String -> String -> List Flag
 export handleBooleanFlag = (stack, prev, fixed) => if (!isFlag(prev)) {
   stack
 } else {
-  List.append(FlagToggle(!isNegatedFlag(prev), fixed), stack)
+  List.append(FlagToggle(fixed, !isNegatedFlag(prev)), stack)
 }
 
 handleOtherFlags :: List Flag -> String -> List String -> List Flag
 export handleOtherFlags = (stack, prev, current) => {
   fixed = cleanFlag(prev)
   currentIsSingle = List.length(current) == 1
+  if (isStringFlag(prev
+
+/*
+handleOtherFlags :: List Flag -> String -> List String -> List Flag
+export handleOtherFlags = (stack, prev, current) => {
+  fixed = cleanFlag(prev)
+  currentIsSingle = List.length(current) == 1
   return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) {
     if (isNegatedFlag(prev)) {
-      List.append(FlagToggle(false, fixed), stack)
+      List.append(FlagToggle(fixed, false), stack)
     } else if (currentIsSingle) {
       handleStringFlag(stack, current, fixed)
-    } else {
-      stack
+    } else do {
+      IO.pTrace("\tskipping?!?!?", { prev, current, stack })
+      return handleBooleanFlag(stack, prev, fixed)
     }
-  } else {
-    where(List.nth(0, current)) {
-      Just(firstCurr) =>
-        handleBooleanFlag(stack, prev, fixed)
-
-      _ =>
-        stack
-    }
+  } else do {
+    IO.pTrace("\thandling boolean", { stack, prev, fixed })
+    return handleBooleanFlag(stack, prev, fixed)
   }
 }
+*/
 
 updateStack :: List Flag -> Maybe (List String) -> List String -> List Flag
-export updateStack = (stack, maybePrevious, current) => where(maybePrevious) {
-  Just(previous) =>
-    if (List.length(previous) > 2) {
-      handleMultipleBooleanFlags(stack, previous)
-    } else {
-      where(previous) {
-        [k, v] =>
-          isFlag(k) && !isFlag(v)
-            ? List.append(Flag(cleanFlag(k), v), stack)
-            : handleMultipleBooleanFlags(stack, previous)
+export updateStack = (stack, maybePrevious, current) => {
+  IO.pTrace("▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚", stack)
+  return where(maybePrevious) {
+    Just(previous) =>
+      do {
+        prevLen = List.length(previous)
+        return if (prevLen > 2) {
+          handleMultipleBooleanFlags(stack, previous)
+        } else {
+          where(previous) {
+            [k, v] =>
+              isFlag(k) && !isFlag(v)
+                ? List.append(Flag(cleanFlag(k), v), stack)
+                : handleMultipleBooleanFlags(stack, previous)
 
-        [x] =>
-          handleOtherFlags(stack, x, current)
+            [x] =>
+              handleOtherFlags(stack, x, current)
 
-        _ =>
-          stack
+            _ =>
+              do {
+                IO.pTrace("\tUNHANDLED CASE!?!?!?", stack)
+                return stack
+              }
+          }
+        }
       }
-    }
 
-  Nothing =>
-    stack
+    Nothing =>
+      do {
+        IO.pTrace("\tNOTHING CASE!?!?!?", stack)
+        return stack
+      }
+  }
 }
 
 parseFlags :: List String -> List Flag

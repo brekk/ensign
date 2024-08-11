@@ -174,5 +174,6 @@ report(
       [FlagToggle("flag", true), FlagToggle("flag2", true), FlagToggle("yet-another-flag", true)],
     ],
     #[["--flag", "--no-dope"], [FlagToggle("flag", true), FlagToggle("dope", false)]],
+    #[["--flag"], [FlagToggle("flag", true)]],
   ],
 )

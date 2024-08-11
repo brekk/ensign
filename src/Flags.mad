@@ -76,14 +76,8 @@ handleOtherFlags :: List Flag -> String -> List String -> List Flag
 export handleOtherFlags = (stack, prev, current) => {
   fixed = cleanFlag(prev)
   currentIsSingle = List.length(current) == 1
-  if (isStringFlag(prev
-
-/*
-handleOtherFlags :: List Flag -> String -> List String -> List Flag
-export handleOtherFlags = (stack, prev, current) => {
-  fixed = cleanFlag(prev)
-  currentIsSingle = List.length(current) == 1
-  return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) {
+  return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) do {
+    IO.pTrace(IO.green("isStringFlag"), isStringFlag(prev)))
     if (isNegatedFlag(prev)) {
       List.append(FlagToggle(fixed, false), stack)
     } else if (currentIsSingle) {
@@ -97,7 +91,6 @@ export handleOtherFlags = (stack, prev, current) => {
     return handleBooleanFlag(stack, prev, fixed)
   }
 }
-*/
 
 updateStack :: List Flag -> Maybe (List String) -> List String -> List Flag
 export updateStack = (stack, maybePrevious, current) => {

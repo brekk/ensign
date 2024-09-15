@@ -1,0 +1,17 @@
+import Party from "PartyBus"
+
+
+
+export LOGS = {
+  detail: Party.tag("detail"),
+  detailStack: Party.tagWithScope("detail", ["stack"]),
+  error: Party.tag("error"),
+  tag: Party.tag("tag"),
+}
+
+export log = {
+  detail: Party.env(LOGS.detail),
+  detailStack: Party.env(LOGS.detailStack),
+  error: Party.env(LOGS.error),
+  tag: Party.env(LOGS.tag),
+}

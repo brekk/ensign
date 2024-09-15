@@ -6,6 +6,8 @@ import List from "List"
 import { Just, Nothing } from "Maybe"
 import String from "String"
 
+import { log } from "@/Log"
+
 
 
 export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
@@ -80,24 +82,34 @@ export handleOtherFlags = (stack, prev, current) => {
   fixed = cleanFlag(prev)
   currentIsSingle = List.length(current) == 1
   return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) do {
-    IO.pTrace(IO.green("isStringFlag"), isStringFlag(prev))
+    log.detailStack(IO.green("isStringFlag"), isStringFlag(prev))
     return if (isNegatedFlag(prev)) {
       List.append(FlagToggle(fixed, false), stack)
     } else if (currentIsSingle) {
       handleStringFlag(stack, current, fixed)
-    } else do {
-      IO.pTrace("\tskipping?!?!?", { prev, current, stack })
-      return handleBooleanFlag(stack, prev, fixed)
+    } else {
+      pipe(
+        (f) => {
+          log.detailStack("\tskipping?!?!?", { stack, prev, fixed: f })
+          return f
+        },
+        handleBooleanFlag(stack, prev),
+      )(fixed)
     }
-  } else do {
-    IO.pTrace("\thandling boolean", { stack, prev, fixed })
-    return handleBooleanFlag(stack, prev, fixed)
+  } else {
+    pipe(
+      (f) => {
+        log.detailStack("\thandling boolean", { stack, prev, fixed: f })
+        return f
+      },
+      handleBooleanFlag(stack, prev),
+    )(fixed)
   }
 }
 
 updateStack :: List Flag -> Maybe (List String) -> List String -> List Flag
 export updateStack = (stack, maybePrevious, current) => {
-  IO.pTrace("▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚", stack)
+  log.detailStack("▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚", stack)
   return where(maybePrevious) {
     Just(previous) =>
       do {
@@ -115,19 +127,13 @@ export updateStack = (stack, maybePrevious, current) => {
               handleOtherFlags(stack, x, current)
 
             _ =>
-              do {
-                IO.pTrace("\tUNHANDLED CASE!?!?!?", stack)
-                return stack
-              }
+              log.detailStack("\tUNHANDLED CASE!?!?!?", stack)
           }
         }
       }
 
     Nothing =>
-      do {
-        IO.pTrace("\tNOTHING CASE!?!?!?", stack)
-        return stack
-      }
+      log.detailStack("\tNOTHING CASE!?!?!?", stack)
   }
 }
 

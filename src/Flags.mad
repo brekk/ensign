@@ -22,6 +22,9 @@ export isShortFlag = String.startsWith("-")
 isFlag :: String -> Boolean
 export isFlag = (x) => isShortFlag(x) || isStringFlag(x) || isNegatedFlag(x)
 
+export on = FlagToggle($, true)
+export off = FlagToggle($, false)
+
 cleanFlag :: String -> String
 export cleanFlag = when(
   isFlag,

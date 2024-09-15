@@ -77,8 +77,8 @@ export handleOtherFlags = (stack, prev, current) => {
   fixed = cleanFlag(prev)
   currentIsSingle = List.length(current) == 1
   return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) do {
-    IO.pTrace(IO.green("isStringFlag"), isStringFlag(prev)))
-    if (isNegatedFlag(prev)) {
+    IO.pTrace(IO.green("isStringFlag"), isStringFlag(prev))
+    return if (isNegatedFlag(prev)) {
       List.append(FlagToggle(fixed, false), stack)
     } else if (currentIsSingle) {
       handleStringFlag(stack, current, fixed)

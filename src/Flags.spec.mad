@@ -1,5 +1,7 @@
 import { Just, Nothing } from "Maybe"
 
+import { caseN2, caseN3, report } from "Study"
+
 import {
   Flag,
   FlagToggle,
@@ -16,7 +18,6 @@ import {
   splitJointFlags,
   updateStack,
 } from "@/Flags"
-import { caseN2, caseN3, report } from "@/Test"
 
 
 

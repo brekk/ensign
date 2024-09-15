@@ -1,7 +1,8 @@
 import String from "String"
 
+import { caseN2, report } from "Study"
+
 import { dropEq, without } from "@/List"
-import { caseN2, report } from "@/Test"
 
 
 

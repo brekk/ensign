@@ -26,3 +26,7 @@ main = (args) => {
     IO.pTrace("output!"),
   )(args)
 }
+
+/*
+madlib run src/Main.mad -- -n "dynne" -d "works for doctor dischord" --repo=brekk/dynne --no-log --no-git -i=curlies
+*/

@@ -1,0 +1,1 @@
+- [ ] - Make a function which takes a set of declared flags and generates formatted documentation

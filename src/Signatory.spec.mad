@@ -1,0 +1,87 @@
+import Dict from "Dictionary"
+import { Left, Right, fromRight } from "Either"
+import { Just, Nothing } from "Maybe"
+
+import { caseN2, caseN3, report } from "Study"
+
+import { parseFlags } from "@/Flags"
+import {
+  ExpectedBoolean,
+  ExpectedString,
+  UnexpectedFlag,
+  createLegend,
+  flagBoolean,
+  flagString,
+  getFlag,
+  getToggle,
+} from "@/Signatory"
+
+
+
+PROGRAM_FLAGS = [
+  flagBoolean("aliases", ["a"], "aliases to use"),
+  flagBoolean("git", ["g"], "should we process git commands?"),
+  flagBoolean("log", ["l"], "should we log as we go?"),
+  flagString("description", ["desc", "d"], "a description of the project"),
+  flagString("ignore", ["i"], "where should we pull the ignore file from?"),
+  flagString("name", ["n"], "what is the name of the project?"),
+  flagString("repo", ["r"], "where is the project located?"),
+  flagString("template", ["t"], "where does the project template live?"),
+]
+
+VALID_INPUTS = [
+  "-n",
+  "dynne",
+  "-d",
+  "works for doctor dischord",
+  `--repo="brekk/dynne"`,
+  "--no-log",
+  "--git",
+  "-i=curlies",
+]
+
+report(
+  pipe(
+    parseFlags,
+    createLegend(PROGRAM_FLAGS),
+  ),
+  "createLegend",
+  [
+    #[
+      VALID_INPUTS,
+      Right({
+        keyed: {{
+          "description": "works for doctor dischord",
+          "ignore": "curlies",
+          "name": "dynne",
+          "repo": "\"brekk/dynne\"",
+        }},
+        on: {{ "git": true, "log": false }},
+      }),
+    ],
+    #[["--no-dope", `--zang=scurp`], Left([UnexpectedFlag("dope"), UnexpectedFlag("zang")])],
+    #[["--name", `--git="ahoy"`], Left([ExpectedString("name"), ExpectedBoolean("git")])],
+  ],
+)
+
+report(
+  (f) => pipe(
+    parseFlags,
+    createLegend(PROGRAM_FLAGS),
+    fromRight({ on: Dict.empty, keyed: Dict.empty }),
+    getFlag(f),
+  )(VALID_INPUTS),
+  "getFlag",
+  [#["ignore", Just("curlies")], #["name", Just("dynne")]],
+)
+
+report(
+  (f) => pipe(
+    parseFlags,
+    createLegend(PROGRAM_FLAGS),
+    fromRight({ on: Dict.empty, keyed: Dict.empty }),
+    getToggle(f),
+  )(VALID_INPUTS),
+  "getFlag",
+  [#["git", Just(true)], #["log", Just(false)]],
+)

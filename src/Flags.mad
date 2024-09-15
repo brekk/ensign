@@ -10,6 +10,9 @@ import String from "String"
 
 export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
 
+export on = FlagToggle($, true)
+export off = FlagToggle($, false)
+
 isStringFlag :: String -> Boolean
 export isStringFlag = String.startsWith("--")
 

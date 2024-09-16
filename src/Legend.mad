@@ -50,20 +50,20 @@ export type Invalid = ExpectedBoolean(String) | ExpectedString(String) | Unexpec
 
 export alias PartialLegend = { ...MatchedDictionary, issues :: List Invalid }
 
-modifyOn = (agg, on) => ({ keyed: agg.keyed, issues: agg.issues, on })
-modifyKeyed = (agg, keyed) => ({ on: agg.on, issues: agg.issues, keyed })
-modifyIssues = (agg, issues) => ({ on: agg.on, keyed: agg.keyed, issues })
+_setOn = (agg, on) => ({ keyed: agg.keyed, issues: agg.issues, on })
+_setKeyed = (agg, keyed) => ({ on: agg.on, issues: agg.issues, keyed })
+_setIssues = (agg, issues) => ({ on: agg.on, keyed: agg.keyed, issues })
 
-handleStringAlias :: PartialLegend -> DeclaredDictionary -> String -> String -> PartialLegend
-handleStringAlias = (agg, known, key, value) => {
+_handleStringAlias :: PartialLegend -> DeclaredDictionary -> String -> String -> PartialLegend
+_handleStringAlias = (agg, known, key, value) => {
   addKey = (p) => pipe(
     Dict.insert(p, value),
-    modifyKeyed(agg),
+    _setKeyed(agg),
   )(agg.keyed)
   addIssue = (cons, p) => pipe(
     cons,
     append($, agg.issues),
-    modifyIssues(agg),
+    _setIssues(agg),
   )(p)
   return pipe(
     Dict.get(key),
@@ -80,16 +80,16 @@ handleStringAlias = (agg, known, key, value) => {
   )(known)
 }
 
-handleBooleanAlias :: PartialLegend -> DeclaredDictionary -> String -> Boolean -> PartialLegend
-handleBooleanAlias = (agg, known, key, value) => {
+_handleBooleanAlias :: PartialLegend -> DeclaredDictionary -> String -> Boolean -> PartialLegend
+_handleBooleanAlias = (agg, known, key, value) => {
   addOn = (p) => pipe(
     Dict.insert(p, value),
-    modifyOn(agg),
+    _setOn(agg),
   )(agg.on)
   addIssue = (cons, p) => pipe(
     cons,
     append($, agg.issues),
-    modifyIssues(agg),
+    _setIssues(agg),
   )(p)
   return pipe(
     Dict.get(key),
@@ -113,10 +113,10 @@ export createLegend = (decls, provided) => {
     reduce(
       (agg, x) => where(x) {
         Flag(key, value) =>
-          handleStringAlias(agg, known, key, value)
+          _handleStringAlias(agg, known, key, value)
 
         FlagToggle(key, value) =>
-          handleBooleanAlias(agg, known, key, value)
+          _handleBooleanAlias(agg, known, key, value)
       },
       { on: {{}}, keyed: {{}}, issues: [] },
     ),
@@ -124,32 +124,33 @@ export createLegend = (decls, provided) => {
   )(provided)
 }
 
-summarizeAliases :: List String -> String
-summarizeAliases = pipe(
-  map(
-    ifElse(
-      pipe(
-        String.length,
-        equals(1),
-      ),
-      mappend("-"),
-      mappend("--"),
-    ),
+flagify :: String -> String
+export flagify = ifElse(
+  pipe(
+    String.length,
+    equals(1),
   ),
+  mappend("-"),
+  mappend("--"),
+)
+
+_summarizeAliases :: List String -> String
+_summarizeAliases = pipe(
+  map(flagify),
   String.join(" / "),
 )
 
 
 alias DeclarationRenderer = String -> String -> List String -> String -> String
 
-flagBlock :: DeclarationRenderer
-flagBlock = (kind, k, als, desc) => `--${k} ${
-  isEmpty(als) ? "" : "/ " ++ summarizeAliases(als)
+_flagBlock :: DeclarationRenderer
+_flagBlock = (kind, k, als, desc) => `--${k} ${
+  isEmpty(als) ? "" : "/ " ++ _summarizeAliases(als)
 }\n  ${kind}\n  ${desc}`
 
 
-flagMarkdownBlock :: DeclarationRenderer
-flagMarkdownBlock = (kind, k, als, desc) => "`--"
+_flagMarkdownBlock :: DeclarationRenderer
+_flagMarkdownBlock = (kind, k, als, desc) => "`--"
     ++ k
     ++ "`"
     ++ `${
@@ -157,7 +158,7 @@ flagMarkdownBlock = (kind, k, als, desc) => "`--"
         ? ""
         : " / "
           ++ pipe(
-            summarizeAliases,
+            _summarizeAliases,
             (z) => "`" ++ z ++ "`",
           )(als)
     }\n  *${kind}*\n  ${desc}`
@@ -176,8 +177,8 @@ export printWithRenderer = (render, x) => pipe(
   String.join("\n\n"),
 )(x)
 
-export printLegend = printWithRenderer(flagBlock)
-export printMarkdownLegend = printWithRenderer(flagMarkdownBlock)
+export printLegend = printWithRenderer(_flagBlock)
+export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
 
 getFlag :: String -> MatchedDictionary -> Maybe String
 export getFlag = (k, mdict) => pipe(

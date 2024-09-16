@@ -3,10 +3,10 @@ import Party from "PartyBus"
 
 
 export LOGS = {
-  detail: Party.tag("detail"),
-  detailStack: Party.tagWithScope("detail", ["stack"]),
-  error: Party.tag("error"),
-  tag: Party.tag("tag"),
+  detail: Party.tagWithScope("ensign", ["detail"]),
+  detailStack: Party.tagWithScope("ensign", ["detail", "stack"]),
+  error: Party.tagWithScope("ensign", ["error"]),
+  tag: Party.tagWithScope("ensign", ["tag"]),
 }
 
 export log = {

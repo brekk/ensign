@@ -4,11 +4,13 @@ import { caseN2, caseN3, report } from "Study"
 
 import {
   Flag,
-  cleanFlag,
-  handleBooleanFlag,
-  handleMultipleBooleanFlags,
-  handleOtherFlags,
-  handleStringFlag,
+  _handleBooleanFlag,
+  _handleMultipleBooleanFlags,
+  _handleOtherFlags,
+  _handleStringFlag,
+  _splitJointFlags,
+  _updateStack,
+  flagSlug,
   isFlag,
   isNegatedFlag,
   isShortFlag,
@@ -16,8 +18,6 @@ import {
   off,
   on,
   parseFlags,
-  splitJointFlags,
-  updateStack,
 } from "@/Flags"
 
 
@@ -62,8 +62,8 @@ report(
 )
 
 report(
-  splitJointFlags,
-  "splitJointFlags",
+  _splitJointFlags,
+  "_splitJointFlags",
   [
     #["-zipzap", ["-z", "-i", "-p", "-z", "-a", "-p"]],
     #["--hey=yo", ["--hey", "yo"]],
@@ -72,14 +72,14 @@ report(
 )
 
 report(
-  caseN2(handleMultipleBooleanFlags),
-  "handleMultipleBooleanFlags",
+  caseN2(_handleMultipleBooleanFlags),
+  "_handleMultipleBooleanFlags",
   [#[#[[], ["-nice"]], [on("nice")]]],
 )
 
 report(
-  caseN3(handleStringFlag),
-  "handleStringFlag",
+  caseN3(_handleStringFlag),
+  "_handleStringFlag",
   [
     #[#[[], ["--nice"], "cool"], []],
     #[#[[off("nah"), on("whatever")], [], "cool"], [off("nah"), on("whatever")]],
@@ -88,8 +88,8 @@ report(
 )
 
 report(
-  caseN3(handleBooleanFlag),
-  "handleBooleanFlag",
+  caseN3(_handleBooleanFlag),
+  "_handleBooleanFlag",
   [
     #[#[[], "--nice", "cool"], [on("cool")]],
     #[#[[off("hey")], "no", ""], [off("hey")]],
@@ -97,15 +97,11 @@ report(
   ],
 )
 
-report(
-  cleanFlag,
-  "cleanFlag",
-  [#["--dope", "dope"], #["--no-doy", "doy"], #["-h", "h"], #["x", "x"]],
-)
+report(flagSlug, "flagSlug", [#["--dope", "dope"], #["--no-doy", "doy"], #["-h", "h"], #["x", "x"]])
 
 report(
-  caseN3(handleOtherFlags),
-  "handleOtherFlags",
+  caseN3(_handleOtherFlags),
+  "_handleOtherFlags",
   [
     #[#[[on("ale")], "beer", []], [on("ale")]],
     #[#[[on("mead")], "--dope", []], [on("mead"), on("dope")]],
@@ -116,8 +112,8 @@ report(
 )
 
 report(
-  caseN3(updateStack),
-  "updateStack",
+  caseN3(_updateStack),
+  "_updateStack",
   [
     #[#[[], Just([]), []], []],
     #[#[[], Nothing, []], []],
@@ -150,11 +146,11 @@ report(
     #[["--flag"], [on("flag")]],
   // FAILING CASES :(
   /*
-        #[
-          ["--flag", "--flag2", "--yet-another-flag"],
-          [on("flag"), on("flag2"), on("yet-another-flag")],
-        ],
-        #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
-        */
+                #[
+                  ["--flag", "--flag2", "--yet-another-flag"],
+                  [on("flag"), on("flag2"), on("yet-another-flag")],
+                ],
+                #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
+                */
   ],
 )

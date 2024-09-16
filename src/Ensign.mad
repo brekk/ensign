@@ -1,26 +1,72 @@
 import type { Flag } from "@/Flags"
+import type {
+  DeclaredDictionary,
+  DeclaredFlag,
+  FlagKind,
+  Invalid,
+  MatchedDictionary,
+  PartialLegend,
+} from "@/Legend"
 
 import {
   Flag,
   FlagToggle,
-  cleanFlag,
+  flagSlug,
   isFlag,
   isNegatedFlag,
   isShortFlag,
   isStringFlag,
+  off,
+  on,
   parseFlags,
 } from "@/Flags"
+import {
+  createLegend,
+  flagBoolean,
+  flagString,
+  flagify,
+  getFlag,
+  getToggle,
+  printLegend,
+  printMarkdownLegend,
+  printWithRenderer,
+  saveAliases,
+  structureAliases,
+} from "@/Legend"
 
 
 
 export type Flag
 
-
-export Flag
+// Flags
 export FlagToggle
-export cleanFlag
+export Flag
+
+export flagSlug
 export isFlag
 export isNegatedFlag
 export isShortFlag
 export isStringFlag
+export off
+export on
 export parseFlags
+
+// Legend
+export type DeclaredDictionary
+export type DeclaredFlag
+export type FlagKind
+export type Invalid
+export type MatchedDictionary
+export type PartialLegend
+
+export flagString
+export flagBoolean
+export structureAliases
+export saveAliases
+export createLegend
+export flagify
+export printWithRenderer
+export printLegend
+export printMarkdownLegend
+export getFlag
+export getToggle

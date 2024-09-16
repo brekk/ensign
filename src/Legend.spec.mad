@@ -1,8 +1,9 @@
 import Dict from "Dictionary"
 import { Left, Right, fromRight } from "Either"
-import { Just, Nothing } from "Maybe"
+import { Just } from "Maybe"
+import { split } from "String"
 
-import { caseN2, caseN3, report } from "Study"
+import { report } from "Study"
 
 import { parseFlags } from "@/Flags"
 import {
@@ -14,7 +15,9 @@ import {
   flagString,
   getFlag,
   getToggle,
-} from "@/Signatory"
+  printLegend,
+  printMarkdownLegend,
+} from "@/Legend"
 
 
 
@@ -27,6 +30,7 @@ PROGRAM_FLAGS = [
   flagString("name", ["n"], "what is the name of the project?"),
   flagString("repo", ["r"], "where is the project located?"),
   flagString("template", ["t"], "where does the project template live?"),
+  flagString("special", [], "this flag is special"),
 ]
 
 VALID_INPUTS = [
@@ -84,4 +88,100 @@ report(
   )(VALID_INPUTS),
   "getFlag",
   [#["git", Just(true)], #["log", Just(false)]],
+)
+
+report(
+  printLegend,
+  "printLegend",
+  [
+    #[
+      PROGRAM_FLAGS,
+      `--aliases / -a
+  boolean
+  aliases to use
+
+--git / -g
+  boolean
+  should we process git commands?
+
+--log / -l
+  boolean
+  should we log as we go?
+
+--description / --desc / -d
+  string
+  a description of the project
+
+--ignore / -i
+  string
+  where should we pull the ignore file from?
+
+--name / -n
+  string
+  what is the name of the project?
+
+--repo / -r
+  string
+  where is the project located?
+
+--template / -t
+  string
+  where does the project template live?
+
+--special 
+  string
+  this flag is special`,
+    ],
+  ],
+)
+
+
+report(
+  pipe(
+    printMarkdownLegend,
+    split("\n"),
+  ),
+  "printMarkdownLegend",
+  [
+    #[
+      PROGRAM_FLAGS,
+      [
+        "`--aliases` / `-a`",
+        "  *boolean*",
+        "  aliases to use",
+        "",
+        "`--git` / `-g`",
+        "  *boolean*",
+        "  should we process git commands?",
+        "",
+        "`--log` / `-l`",
+        "  *boolean*",
+        "  should we log as we go?",
+        "",
+        "`--description` / `--desc / -d`",
+        "  *string*",
+        "  a description of the project",
+        "",
+        "`--ignore` / `-i`",
+        "  *string*",
+        "  where should we pull the ignore file from?",
+        "",
+        "`--name` / `-n`",
+        "  *string*",
+        "  what is the name of the project?",
+        "",
+        "`--repo` / `-r`",
+        "  *string*",
+        "  where is the project located?",
+        "",
+        "`--template` / `-t`",
+        "  *string*",
+        "  where does the project template live?",
+        "",
+        "`--special`",
+        "  *string*",
+        "  this flag is special",
+      ],
+    ],
+  ],
 )

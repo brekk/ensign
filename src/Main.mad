@@ -4,22 +4,23 @@ import List from "List"
 import { Just, Nothing } from "Maybe"
 
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
+import { createLegend, flagBoolean, flagString, saveAliases } from "@/Legend"
 import { without } from "@/List"
-import { createLegend, flagBoolean, flagString, saveAliases } from "@/Signatory"
 
 
 
 main = (args) => {
   PROGRAM_FLAGS = [
-    flagBoolean("aliases", ["a"]),
-    flagBoolean("git", ["g"]),
-    flagBoolean("log", ["l"]),
-    flagString("description", ["desc", "d"]),
-    flagString("ignore", ["i"]),
-    flagString("name", ["n"]),
-    flagString("repo", ["r"]),
-    flagString("template", ["t"]),
+    flagBoolean("aliases", ["a"], "aliases to use"),
+    flagBoolean("git", ["g"], "should we process git commands?"),
+    flagBoolean("log", ["l"], "should we log as we go?"),
+    flagString("description", ["desc", "d"], "a description of the project"),
+    flagString("ignore", ["i"], "where should we pull the ignore file from?"),
+    flagString("name", ["n"], "what is the name of the project?"),
+    flagString("repo", ["r"], "where is the project located?"),
+    flagString("template", ["t"], "where does the project template live?"),
   ]
+
   pipe(
     parseFlags,
     createLegend(PROGRAM_FLAGS),

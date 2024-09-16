@@ -5,8 +5,10 @@ import type { Flag } from "@/Flags"
 
 import Dict from "Dictionary"
 import { Left, Right } from "Either"
-import { append, length, reduce } from "List"
+import { equals, ifElse } from "Function"
+import { append, isEmpty, length, reduce } from "List"
 import { Just, Nothing } from "Maybe"
+import String from "String"
 
 import { Flag, FlagToggle } from "@/Flags"
 
@@ -121,6 +123,61 @@ export createLegend = (decls, provided) => {
     (raw) => length(raw.issues) > 0 ? Left(raw.issues) : Right({ on: raw.on, keyed: raw.keyed }),
   )(provided)
 }
+
+summarizeAliases :: List String -> String
+summarizeAliases = pipe(
+  map(
+    ifElse(
+      pipe(
+        String.length,
+        equals(1),
+      ),
+      mappend("-"),
+      mappend("--"),
+    ),
+  ),
+  String.join(" / "),
+)
+
+
+alias DeclarationRenderer = String -> String -> List String -> String -> String
+
+flagBlock :: DeclarationRenderer
+flagBlock = (kind, k, als, desc) => `--${k} ${
+  isEmpty(als) ? "" : "/ " ++ summarizeAliases(als)
+}\n  ${kind}\n  ${desc}`
+
+
+flagMarkdownBlock :: DeclarationRenderer
+flagMarkdownBlock = (kind, k, als, desc) => "`--"
+    ++ k
+    ++ "`"
+    ++ `${
+      isEmpty(als)
+        ? ""
+        : " / "
+          ++ pipe(
+            summarizeAliases,
+            (z) => "`" ++ z ++ "`",
+          )(als)
+    }\n  *${kind}*\n  ${desc}`
+
+printWithRenderer :: DeclarationRenderer -> List DeclaredFlag -> String
+export printWithRenderer = (render, x) => pipe(
+  map(
+    where {
+      DeclaredFlag(FBoolean, k, als, desc) =>
+        render("boolean", k, als, desc)
+
+      DeclaredFlag(FString, k, als, desc) =>
+        render("string", k, als, desc)
+    },
+  ),
+  String.join("\n\n"),
+)(x)
+
+export printLegend = printWithRenderer(flagBlock)
+export printMarkdownLegend = printWithRenderer(flagMarkdownBlock)
 
 getFlag :: String -> MatchedDictionary -> Maybe String
 export getFlag = (k, mdict) => pipe(

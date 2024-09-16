@@ -3,7 +3,6 @@ import { split } from "String"
 
 import { report } from "Study"
 
-import { Flag, FlagToggle, parseFlags } from "@/Flags"
 import {
   ExpectedBoolean,
   ExpectedString,
@@ -13,7 +12,8 @@ import {
   printLegend,
   printMarkdownLegend,
   validate,
-} from "@/Legend"
+} from "@/Declared"
+import { Flag, FlagToggle, parseFlags } from "@/Flags"
 
 
 

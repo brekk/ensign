@@ -1,18 +1,6 @@
+import type { DeclaredFlag, FlagKind, Invalid } from "@/Declared"
 import type { Flag } from "@/Flags"
-import type { DeclaredFlag, FlagKind, Invalid } from "@/Legend"
 
-import {
-  Flag,
-  FlagToggle,
-  flagSlug,
-  isFlag,
-  isNegatedFlag,
-  isShortFlag,
-  isStringFlag,
-  off,
-  on,
-  parseFlags,
-} from "@/Flags"
 import {
   DeclaredFlag,
   ExpectedBoolean,
@@ -25,7 +13,19 @@ import {
   printMarkdownLegend,
   printWithRenderer,
   validate,
-} from "@/Legend"
+} from "@/Declared"
+import {
+  Flag,
+  FlagToggle,
+  flagSlug,
+  isFlag,
+  isNegatedFlag,
+  isShortFlag,
+  isStringFlag,
+  off,
+  on,
+  parseFlags,
+} from "@/Flags"
 
 
 

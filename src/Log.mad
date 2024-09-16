@@ -7,6 +7,7 @@ export LOGS = {
   detailStack: Party.tagWithScope("ensign", ["detail", "stack"]),
   error: Party.tagWithScope("ensign", ["error"]),
   tag: Party.tagWithScope("ensign", ["tag"]),
+  validate: Party.tagWithScope("ensign", ["validate"]),
 }
 
 export log = {
@@ -14,4 +15,5 @@ export log = {
   detailStack: Party.env(LOGS.detailStack),
   error: Party.env(LOGS.error),
   tag: Party.env(LOGS.tag),
+  validate: Party.env(LOGS.validate),
 }

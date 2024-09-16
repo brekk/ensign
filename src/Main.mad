@@ -4,7 +4,7 @@ import List from "List"
 import { Just, Nothing } from "Maybe"
 
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
-import { createLegend, flagBoolean, flagString, saveAliases } from "@/Legend"
+import { flagBoolean, flagString, validate } from "@/Legend"
 import { without } from "@/List"
 
 
@@ -23,7 +23,7 @@ main = (args) => {
 
   pipe(
     parseFlags,
-    createLegend(PROGRAM_FLAGS),
+    validate(PROGRAM_FLAGS),
     IO.pTrace("output!"),
   )(args)
 }

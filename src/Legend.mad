@@ -1,128 +1,28 @@
 import type { Either } from "Either"
-import type { Maybe } from "Maybe"
 
 import type { Flag } from "@/Flags"
 
-import Dict from "Dictionary"
 import { Left, Right } from "Either"
 import { equals, ifElse } from "Function"
-import { append, isEmpty, length, reduce } from "List"
-import { Just, Nothing } from "Maybe"
+import { append, find, includes, isEmpty, reduce } from "List"
+import { Just } from "Maybe"
 import String from "String"
 
 import { Flag, FlagToggle } from "@/Flags"
 
 
 
-export alias MatchedDictionary = {
-  keyed :: Dictionary String String,
-  on :: Dictionary String Boolean,
-}
-
 export type FlagKind = FString | FBoolean
-
-// primary key, aliases
+// kind, key, aliases, description
 export type DeclaredFlag = DeclaredFlag(FlagKind, String, List String, String)
+export alias DeclarationRenderer = String -> String -> List String -> String -> String
+export type Invalid = ExpectedBoolean(String) | ExpectedString(String) | UnexpectedFlag(String)
+
+// constructors
 
 export flagString = DeclaredFlag(FString)
 export flagBoolean = DeclaredFlag(FBoolean)
 
-structureAliases :: String -> List String -> FlagKind -> List #[String, #[String, FlagKind]]
-export structureAliases = (key, aliases, kind) => pipe(
-  append(key),
-  map((a) => #[a, #[key, kind]]),
-)(aliases)
-
-export alias DeclaredDictionary = Dictionary String #[String, FlagKind]
-
-saveAliases :: List DeclaredFlag -> DeclaredDictionary
-export saveAliases = pipe(
-  chain(
-    where {
-      DeclaredFlag(kind, key, aliases, description) =>
-        structureAliases(key, aliases, kind)
-    },
-  ),
-  Dict.fromList,
-)
-
-export type Invalid = ExpectedBoolean(String) | ExpectedString(String) | UnexpectedFlag(String)
-
-export alias PartialLegend = { ...MatchedDictionary, issues :: List Invalid }
-
-_setOn = (agg, on) => ({ keyed: agg.keyed, issues: agg.issues, on })
-_setKeyed = (agg, keyed) => ({ on: agg.on, issues: agg.issues, keyed })
-_setIssues = (agg, issues) => ({ on: agg.on, keyed: agg.keyed, issues })
-
-_handleStringAlias :: PartialLegend -> DeclaredDictionary -> String -> String -> PartialLegend
-_handleStringAlias = (agg, known, key, value) => {
-  addKey = (p) => pipe(
-    Dict.insert(p, value),
-    _setKeyed(agg),
-  )(agg.keyed)
-  addIssue = (cons, p) => pipe(
-    cons,
-    append($, agg.issues),
-    _setIssues(agg),
-  )(p)
-  return pipe(
-    Dict.get(key),
-    where {
-      Just(#[primary, FString]) =>
-        addKey(primary)
-
-      Just(#[primary, FBoolean]) =>
-        addIssue(ExpectedBoolean, primary)
-
-      Nothing =>
-        addIssue(UnexpectedFlag, key)
-    },
-  )(known)
-}
-
-_handleBooleanAlias :: PartialLegend -> DeclaredDictionary -> String -> Boolean -> PartialLegend
-_handleBooleanAlias = (agg, known, key, value) => {
-  addOn = (p) => pipe(
-    Dict.insert(p, value),
-    _setOn(agg),
-  )(agg.on)
-  addIssue = (cons, p) => pipe(
-    cons,
-    append($, agg.issues),
-    _setIssues(agg),
-  )(p)
-  return pipe(
-    Dict.get(key),
-    where {
-      Just(#[primary, FBoolean]) =>
-        addOn(primary)
-
-      Just(#[primary, FString]) =>
-        addIssue(ExpectedString, primary)
-
-      Nothing =>
-        addIssue(UnexpectedFlag, key)
-    },
-  )(known)
-}
-
-createLegend :: List DeclaredFlag -> List Flag -> Either (List Invalid) MatchedDictionary
-export createLegend = (decls, provided) => {
-  known = saveAliases(decls)
-  return pipe(
-    reduce(
-      (agg, x) => where(x) {
-        Flag(key, value) =>
-          _handleStringAlias(agg, known, key, value)
-
-        FlagToggle(key, value) =>
-          _handleBooleanAlias(agg, known, key, value)
-      },
-      { on: {{}}, keyed: {{}}, issues: [] },
-    ),
-    (raw) => length(raw.issues) > 0 ? Left(raw.issues) : Right({ on: raw.on, keyed: raw.keyed }),
-  )(provided)
-}
 
 flagify :: String -> String
 export flagify = ifElse(
@@ -140,8 +40,6 @@ _summarizeAliases = pipe(
   String.join(" / "),
 )
 
-
-alias DeclarationRenderer = String -> String -> List String -> String -> String
 
 _flagBlock :: DeclarationRenderer
 _flagBlock = (kind, k, als, desc) => `--${k} ${
@@ -177,17 +75,54 @@ export printWithRenderer = (render, x) => pipe(
   String.join("\n\n"),
 )(x)
 
+_validKeysFromDeclaration :: List DeclaredFlag -> List #[FlagKind, List String, String]
+_validKeysFromDeclaration = reduce(
+  (agg, x) => where(x) {
+    DeclaredFlag(kind, key, aliases, _) =>
+      append(#[kind, append(key, aliases), key], agg)
+  },
+  [],
+)
+
+_validator = (lookup, agg, x) => {
+  addIssue = (i) => ({ flags: agg.flags, issues: append(i, agg.issues) })
+  addFlag = (f) => ({ issues: agg.issues, flags: append(f, agg.flags) })
+  return where(x) {
+    Flag(key, value) =>
+      pipe(
+        lookup,
+        where {
+          Just(#[kind, _, root]) =>
+            kind == FString ? addFlag(Flag(root, value)) : addIssue(ExpectedBoolean(key))
+
+          _ =>
+            addIssue(UnexpectedFlag(key))
+        },
+      )(key)
+
+    FlagToggle(key, value) =>
+      pipe(
+        lookup,
+        where {
+          Just(#[kind, _, root]) =>
+            kind == FBoolean ? addFlag(FlagToggle(root, value)) : addIssue(ExpectedString(key))
+
+          _ =>
+            addIssue(UnexpectedFlag(key))
+        },
+      )(key)
+  }
+}
+
+validate :: List DeclaredFlag -> List Flag -> Either (List Invalid) (List Flag)
+export validate = (declared, parsed) => {
+  vkeys = _validKeysFromDeclaration(declared)
+  lookup = (key) => find(where { #[_, keys, _] => includes(key, keys) }, vkeys)
+  return pipe(
+    reduce(_validator(lookup), { flags: [], issues: [] }),
+    (raw) => isEmpty(raw.issues) ? Right(raw.flags) : Left(raw.issues),
+  )(parsed)
+}
+
 export printLegend = printWithRenderer(_flagBlock)
 export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
-
-getFlag :: String -> MatchedDictionary -> Maybe String
-export getFlag = (k, mdict) => pipe(
-  .keyed,
-  Dict.get(k),
-)(mdict)
-
-getToggle :: String -> MatchedDictionary -> Maybe Boolean
-export getToggle = (k, mdict) => pipe(
-  .on,
-  Dict.get(k),
-)(mdict)

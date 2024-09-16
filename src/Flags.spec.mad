@@ -146,11 +146,11 @@ report(
     #[["--flag"], [on("flag")]],
   // FAILING CASES :(
   /*
-                #[
-                  ["--flag", "--flag2", "--yet-another-flag"],
-                  [on("flag"), on("flag2"), on("yet-another-flag")],
-                ],
-                #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
-                */
+                    #[
+                      ["--flag", "--flag2", "--yet-another-flag"],
+                      [on("flag"), on("flag2"), on("yet-another-flag")],
+                    ],
+                    #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
+                    */
   ],
 )

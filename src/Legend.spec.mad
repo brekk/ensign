@@ -1,22 +1,18 @@
-import Dict from "Dictionary"
-import { Left, Right, fromRight } from "Either"
-import { Just } from "Maybe"
+import { Left, Right } from "Either"
 import { split } from "String"
 
 import { report } from "Study"
 
-import { parseFlags } from "@/Flags"
+import { Flag, FlagToggle, parseFlags } from "@/Flags"
 import {
   ExpectedBoolean,
   ExpectedString,
   UnexpectedFlag,
-  createLegend,
   flagBoolean,
   flagString,
-  getFlag,
-  getToggle,
   printLegend,
   printMarkdownLegend,
+  validate,
 } from "@/Legend"
 
 
@@ -47,47 +43,25 @@ VALID_INPUTS = [
 report(
   pipe(
     parseFlags,
-    createLegend(PROGRAM_FLAGS),
+    validate(PROGRAM_FLAGS),
   ),
-  "createLegend",
+  "validate",
   [
     #[
       VALID_INPUTS,
-      Right({
-        keyed: {{
-          "description": "works for doctor dischord",
-          "ignore": "curlies",
-          "name": "dynne",
-          "repo": "\"brekk/dynne\"",
-        }},
-        on: {{ "git": true, "log": false }},
-      }),
+      Right([
+        Flag("name", "dynne"),
+        Flag("description", "works for doctor dischord"),
+        Flag("repo", "\"brekk/dynne\""),
+        FlagToggle("log", false),
+        FlagToggle("git", true),
+        Flag("ignore", "curlies"),
+      ]),
     ],
-    #[["--no-dope", `--zang=scurp`], Left([UnexpectedFlag("dope"), UnexpectedFlag("zang")])],
-    #[["--name", `--git="ahoy"`], Left([ExpectedString("name"), ExpectedBoolean("git")])],
+    #[["--name"], Left([ExpectedString("name")])],
+    #[["--git=yes"], Left([ExpectedBoolean("git")])],
+    #[["--x=100", "--no-y"], Left([UnexpectedFlag("x"), UnexpectedFlag("y")])],
   ],
-)
-
-report(
-  (f) => pipe(
-    parseFlags,
-    createLegend(PROGRAM_FLAGS),
-    fromRight({ on: Dict.empty, keyed: Dict.empty }),
-    getFlag(f),
-  )(VALID_INPUTS),
-  "getFlag",
-  [#["ignore", Just("curlies")], #["name", Just("dynne")]],
-)
-
-report(
-  (f) => pipe(
-    parseFlags,
-    createLegend(PROGRAM_FLAGS),
-    fromRight({ on: Dict.empty, keyed: Dict.empty }),
-    getToggle(f),
-  )(VALID_INPUTS),
-  "getFlag",
-  [#["git", Just(true)], #["log", Just(false)]],
 )
 
 report(

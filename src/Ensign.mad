@@ -1,12 +1,5 @@
 import type { Flag } from "@/Flags"
-import type {
-  DeclaredDictionary,
-  DeclaredFlag,
-  FlagKind,
-  Invalid,
-  MatchedDictionary,
-  PartialLegend,
-} from "@/Legend"
+import type { DeclaredFlag, FlagKind, Invalid } from "@/Legend"
 
 import {
   Flag,
@@ -21,27 +14,30 @@ import {
   parseFlags,
 } from "@/Flags"
 import {
-  createLegend,
+  DeclaredFlag,
+  ExpectedBoolean,
+  ExpectedString,
+  UnexpectedFlag,
   flagBoolean,
   flagString,
   flagify,
-  getFlag,
-  getToggle,
   printLegend,
   printMarkdownLegend,
   printWithRenderer,
-  saveAliases,
-  structureAliases,
+  validate,
 } from "@/Legend"
 
 
 
+// Flags
+//-- types
 export type Flag
 
-// Flags
+//-- constructors
 export FlagToggle
 export Flag
 
+//-- functions
 export flagSlug
 export isFlag
 export isNegatedFlag
@@ -52,21 +48,22 @@ export on
 export parseFlags
 
 // Legend
-export type DeclaredDictionary
+//-- types
 export type DeclaredFlag
 export type FlagKind
 export type Invalid
-export type MatchedDictionary
-export type PartialLegend
 
+//-- constructors
+export DeclaredFlag
+export ExpectedBoolean
+export ExpectedString
+export UnexpectedFlag
+
+//-- functions
 export flagString
 export flagBoolean
-export structureAliases
-export saveAliases
-export createLegend
 export flagify
 export printWithRenderer
 export printLegend
 export printMarkdownLegend
-export getFlag
-export getToggle
+export validate

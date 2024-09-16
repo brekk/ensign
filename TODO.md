@@ -1,1 +1,2 @@
-- [ ] - Make a function which takes a set of declared flags and generates formatted documentation
+- [x] - Make a function which takes a set of declared flags and generates formatted documentation
+- [ ] - Fix the failing cases of boolean flags in sequence (see [src/Flags.spec.mad](https://github.com/brekk/ensign/blob/main/src/Flags.spec.mad#L151-L158))

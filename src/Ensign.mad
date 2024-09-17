@@ -6,9 +6,11 @@ import {
   ExpectedBoolean,
   ExpectedString,
   UnexpectedFlag,
+  check,
   flagBoolean,
   flagString,
   flagify,
+  printIssues,
   printLegend,
   printMarkdownLegend,
   printWithRenderer,
@@ -60,10 +62,12 @@ export ExpectedString
 export UnexpectedFlag
 
 //-- functions
-export flagString
+export check
 export flagBoolean
+export flagString
 export flagify
-export printWithRenderer
+export printIssues
 export printLegend
 export printMarkdownLegend
+export printWithRenderer
 export validate

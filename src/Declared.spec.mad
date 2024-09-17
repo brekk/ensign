@@ -1,4 +1,4 @@
-import { Left, Right } from "Either"
+import { Left, Right, mapLeft } from "Either"
 import { split } from "String"
 
 import { report } from "Study"
@@ -7,8 +7,10 @@ import {
   ExpectedBoolean,
   ExpectedString,
   UnexpectedFlag,
+  check,
   flagBoolean,
   flagString,
+  printIssues,
   printLegend,
   printMarkdownLegend,
   validate,
@@ -61,6 +63,35 @@ report(
     #[["--name"], Left([ExpectedString("name")])],
     #[["--git=yes"], Left([ExpectedBoolean("git")])],
     #[["--x=100", "--no-y"], Left([UnexpectedFlag("x"), UnexpectedFlag("y")])],
+  ],
+)
+
+report(
+  pipe(
+    parseFlags,
+    check(PROGRAM_FLAGS),
+  ),
+  "check",
+  [
+    #[
+      ["--name", "--git=yes", "--no-y"],
+      { issues: [ExpectedString("name"), ExpectedBoolean("git"), UnexpectedFlag("y")], flags: [] },
+    ],
+  ],
+)
+report(
+  pipe(
+    parseFlags,
+    check(PROGRAM_FLAGS),
+    .issues,
+    printIssues,
+  ),
+  "check",
+  [
+    #[
+      ["--name", "--git=yes", "--no-y"],
+      "Errors during parsing.\n\tExpected string flag (name), but got boolean.\n\tExpected boolean flag (git), but got string.\n\tUnexpected flag y.",
+    ],
   ],
 )
 

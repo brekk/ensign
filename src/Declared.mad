@@ -15,8 +15,10 @@ import { Flag, FlagToggle } from "@/Flags"
 export type FlagKind = FString | FBoolean
 // kind, key, aliases, description
 export type DeclaredFlag = DeclaredFlag(FlagKind, String, List String, String)
-export alias DeclarationRenderer = String -> String -> List String -> String -> String
 export type Invalid = ExpectedBoolean(String) | ExpectedString(String) | UnexpectedFlag(String)
+
+export alias DeclarationRenderer = String -> String -> List String -> String -> String
+export alias ParsedValidation = { flags :: List Flag, issues :: List Invalid }
 
 // constructors
 
@@ -75,6 +77,9 @@ export printWithRenderer = (render, x) => pipe(
   String.join("\n\n"),
 )(x)
 
+export printLegend = printWithRenderer(_flagBlock)
+export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
+
 _validKeysFromDeclaration :: List DeclaredFlag -> List #[FlagKind, List String, String]
 _validKeysFromDeclaration = reduce(
   (agg, x) => where(x) {
@@ -114,15 +119,33 @@ _validator = (lookup, agg, x) => {
   }
 }
 
-validate :: List DeclaredFlag -> List Flag -> Either (List Invalid) (List Flag)
-export validate = (declared, parsed) => {
+check :: List DeclaredFlag -> List Flag -> ParsedValidation
+export check = (declared, parsed) => {
   vkeys = _validKeysFromDeclaration(declared)
   lookup = (key) => find(where { #[_, keys, _] => includes(key, keys) }, vkeys)
-  return pipe(
-    reduce(_validator(lookup), { flags: [], issues: [] }),
-    (raw) => isEmpty(raw.issues) ? Right(raw.flags) : Left(raw.issues),
-  )(parsed)
+  return reduce(_validator(lookup), { flags: [], issues: [] }, parsed)
 }
 
-export printLegend = printWithRenderer(_flagBlock)
-export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
+validate :: List DeclaredFlag -> List Flag -> Either (List Invalid) (List Flag)
+export validate = (declared, parsed) => pipe(
+  check(declared),
+  (raw) => isEmpty(raw.issues) ? Right(raw.flags) : Left(raw.issues),
+)(parsed)
+
+printIssues :: List Invalid -> String
+export printIssues = pipe(
+  map(
+    where {
+      UnexpectedFlag(f) =>
+        "Unexpected flag " ++ f ++ "."
+
+      ExpectedBoolean(b) =>
+        "Expected boolean flag (" ++ b ++ "), but got string."
+
+      ExpectedString(s) =>
+        "Expected string flag (" ++ s ++ "), but got boolean."
+    },
+  ),
+  String.join("\n\t"),
+  mappend("Errors during parsing.\n\t"),
+)

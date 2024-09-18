@@ -13,6 +13,7 @@ import { Flag, FlagToggle } from "@/Flags"
 
 
 export type FlagKind = FString | FBoolean
+
 // kind, key, aliases, description
 export type DeclaredFlag = DeclaredFlag(FlagKind, String, List String, String)
 export type Invalid = ExpectedBoolean(String) | ExpectedString(String) | UnexpectedFlag(String)

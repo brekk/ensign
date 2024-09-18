@@ -29,6 +29,7 @@ PROGRAM_FLAGS = [
   flagString("repo", ["r"], "where is the project located?"),
   flagString("template", ["t"], "where does the project template live?"),
   flagString("special", [], "this flag is special"),
+  flagString("zipZapZop", [], "this flag is a camel"),
 ]
 
 VALID_INPUTS = [
@@ -40,6 +41,7 @@ VALID_INPUTS = [
   "--no-log",
   "--git",
   "-i=curlies",
+  "--zip-zap-zop=noice",
 ]
 
 report(
@@ -58,6 +60,7 @@ report(
         FlagToggle("log", false),
         FlagToggle("git", true),
         Flag("ignore", "curlies"),
+        Flag("zipZapZop", "noice"),
       ]),
     ],
     #[["--name"], Left([ExpectedString("name")])],
@@ -135,7 +138,11 @@ report(
 
 --special 
   string
-  this flag is special`,
+  this flag is special
+
+--zip-zap-zop
+  string
+  this flag is camel`,
     ],
   ],
 )
@@ -186,6 +193,10 @@ report(
         "`--special`",
         "  *string*",
         "  this flag is special",
+        "",
+        "`--zip-zap-zop`",
+        "  *string*",
+        "  this flag is camel",
       ],
     ],
   ],

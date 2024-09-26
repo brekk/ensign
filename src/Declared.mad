@@ -3,7 +3,8 @@ import type { Either } from "Either"
 import type { Flag } from "@/Flags"
 
 import { Left, Right } from "Either"
-import { equals, ifElse } from "Function"
+import { equals, identity, ifElse } from "Function"
+import IO from "IO"
 import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"
 import String from "String"
@@ -37,18 +38,22 @@ export flagify = ifElse(
   mappend("--"),
 )
 
-_summarizeAliases :: List String -> String
-_summarizeAliases = pipe(
+_summarizeAliasesWithColor :: Boolean -> List String -> String
+_summarizeAliasesWithColor = (useColor, als) => pipe(
   map(flagify),
+  useColor ? map(IO.yellow) : identity,
   String.join(" / "),
-)
+)(als)
+
+_summarizeAliases = _summarizeAliasesWithColor(false)
 
 
-_flagBlock :: DeclarationRenderer
-_flagBlock = (kind, k, als, desc) => `--${k} ${
-  isEmpty(als) ? "" : "/ " ++ _summarizeAliases(als)
+_flagBlockWithColor :: Boolean -> DeclarationRenderer
+_flagBlockWithColor = (useColor, kind, k, als, desc) => `--${k} ${
+  isEmpty(als) ? "" : "/ " ++ _summarizeAliasesWithColor(useColor, als)
 }\n  ${kind}\n  ${desc}`
 
+_flagBlock = _flagBlockWithColor(false)
 
 _flagMarkdownBlock :: DeclarationRenderer
 _flagMarkdownBlock = (kind, k, als, desc) => "`--"
@@ -79,6 +84,7 @@ export printWithRenderer = (render, x) => pipe(
 )(x)
 
 export printLegend = printWithRenderer(_flagBlock)
+export printLegendWithColor = printWithRenderer(_flagBlockWithColor(true))
 export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
 
 _validKeysFromDeclaration :: List DeclaredFlag -> List #[FlagKind, List String, String]

@@ -6,14 +6,25 @@ import List from "List"
 import { Just, Nothing } from "Maybe"
 import String from "String"
 
+import O from "Orthography"
+
 import { log } from "@/Log"
 
 
 
 export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
 
-export on = FlagToggle($, true)
-export off = FlagToggle($, false)
+export format = O.convert(O.create(O.get.camel, O.set.kebab))
+export unformat = O.convert(O.create(O.get.kebab, O.set.camel))
+
+export on = pipe(
+  format,
+  FlagToggle($, true),
+)
+export off = pipe(
+  format,
+  FlagToggle($, false),
+)
 
 isStringFlag :: String -> Boolean
 export isStringFlag = String.startsWith("--")

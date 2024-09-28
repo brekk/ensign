@@ -14,8 +14,8 @@ import { log } from "@/Log"
 
 export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
 
-export format = O.convert(O.create(O.get.camel, O.set.kebab))
-export unformat = O.convert(O.create(O.get.kebab, O.set.camel))
+converter = O.translate(O.bidi(O.pairs.kebab, O.pairs.camel))
+format = converter(true)
 
 export on = pipe(
   format,

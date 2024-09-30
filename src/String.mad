@@ -1,0 +1,7 @@
+import Ortho from "Orthography"
+
+
+
+export _translate = Ortho.translate(Ortho.bidi(Ortho.pairs.kebab, Ortho.pairs.camel))
+export camelToKebab = _translate(true)
+export kebabToCamel = _translate(false)

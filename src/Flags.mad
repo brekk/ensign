@@ -14,17 +14,11 @@ import { log } from "@/Log"
 
 export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
 
-converter = O.translate(O.bidi(O.pairs.kebab, O.pairs.camel))
-format = converter(true)
+// converter = O.translate(O.bidi(O.pairs.kebab, O.pairs.camel))
+// format = converter(true)
 
-export on = pipe(
-  format,
-  FlagToggle($, true),
-)
-export off = pipe(
-  format,
-  FlagToggle($, false),
-)
+export on = FlagToggle($, true)
+export off = FlagToggle($, false)
 
 isStringFlag :: String -> Boolean
 export isStringFlag = String.startsWith("--")

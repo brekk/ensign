@@ -3,18 +3,15 @@ import { split } from "String"
 
 import { report } from "Study"
 
+import { check, validate } from "@/Declared"
 import {
   ExpectedBoolean,
   ExpectedString,
   UnexpectedFlag,
-  check,
   flagBoolean,
   flagString,
-  printIssues,
-  printLegend,
-  printMarkdownLegend,
-  validate,
-} from "@/Declared"
+} from "@/Declared/Flags"
+import { printIssues, printLegend, printMarkdownLegend } from "@/Declared/Print"
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
 
 

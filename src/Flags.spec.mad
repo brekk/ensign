@@ -144,13 +144,27 @@ report(
       ],
     ],
     #[["--flag"], [on("flag")]],
-  // FAILING CASES :(
-  /*
-                    #[
-                      ["--flag", "--flag2", "--yet-another-flag"],
-                      [on("flag"), on("flag2"), on("yet-another-flag")],
-                    ],
-                    #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
-                    */
+  ],
+)
+
+// these cases fail currently
+report(
+  parseFlags,
+  "parseFlags - boolean sequence",
+  [
+    #[
+      ["--flag", "--flag2", "--yet-another-flag"],
+      [on("flag"), on("flag2"), on("yet-another-flag")],
+    ],
+    #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
+  ],
+)
+
+report(
+  parseFlags,
+  "parseFlags - strings with quotes",
+  [
+    #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
+    #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
   ],
 )

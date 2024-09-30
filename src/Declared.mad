@@ -1,5 +1,7 @@
 import type { Either } from "Either"
 
+import type { Invalid } from "@/Declared/Flags"
+import type { DeclaredFlag, FlagKind } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
 
 import { Left, Right } from "Either"
@@ -9,83 +11,28 @@ import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"
 import String from "String"
 
+import {
+  DeclaredFlag,
+  ExpectedBoolean,
+  ExpectedString,
+  FBoolean,
+  FString,
+  UnexpectedFlag,
+} from "@/Declared/Flags"
 import { Flag, FlagToggle } from "@/Flags"
+import { camelToKebab } from "@/String"
 
 
 
-export type FlagKind = FString | FBoolean
-
-// kind, key, aliases, description
-export type DeclaredFlag = DeclaredFlag(FlagKind, String, List String, String)
-export type Invalid = ExpectedBoolean(String) | ExpectedString(String) | UnexpectedFlag(String)
-
-export alias DeclarationRenderer = String -> String -> List String -> String -> String
 export alias ParsedValidation = { flags :: List Flag, issues :: List Invalid }
 
 // constructors
 
-export flagString = DeclaredFlag(FString)
-export flagBoolean = DeclaredFlag(FBoolean)
 
-
-flagify :: String -> String
-export flagify = ifElse(
-  pipe(
-    String.length,
-    equals(1),
-  ),
-  mappend("-"),
-  mappend("--"),
-)
-
-_summarizeAliasesWithColor :: Boolean -> List String -> String
-_summarizeAliasesWithColor = (useColor, als) => pipe(
-  map(flagify),
-  useColor ? map(IO.yellow) : identity,
-  String.join(" / "),
-)(als)
-
-_summarizeAliases = _summarizeAliasesWithColor(false)
-
-
-_flagBlockWithColor :: Boolean -> DeclarationRenderer
-_flagBlockWithColor = (useColor, kind, k, als, desc) => `--${k} ${
-  isEmpty(als) ? "" : "/ " ++ _summarizeAliasesWithColor(useColor, als)
-}\n  ${kind}\n  ${desc}`
-
-_flagBlock = _flagBlockWithColor(false)
-
-_flagMarkdownBlock :: DeclarationRenderer
-_flagMarkdownBlock = (kind, k, als, desc) => "`--"
-    ++ k
-    ++ "`"
-    ++ `${
-      isEmpty(als)
-        ? ""
-        : " / "
-          ++ pipe(
-            _summarizeAliases,
-            (z) => "`" ++ z ++ "`",
-          )(als)
-    }\n  *${kind}*\n  ${desc}`
-
-printWithRenderer :: DeclarationRenderer -> List DeclaredFlag -> String
-export printWithRenderer = (render, x) => pipe(
-  map(
-    where {
-      DeclaredFlag(FBoolean, k, als, desc) =>
-        render("boolean", k, als, desc)
-
-      DeclaredFlag(FString, k, als, desc) =>
-        render("string", k, als, desc)
-    },
-  ),
-  String.join("\n\n"),
-)(x)
-
-export printLegend = printWithRenderer(_flagBlock)
-export printLegendWithColor = printWithRenderer(_flagBlockWithColor(true))
-export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
+// export _autoConvert = (cons, primary, als, desc) => pipe(
+//   camelToKebab,
+//   cons($, map(camelToKebab)(als), desc),
+// )(primary)
 
 _validKeysFromDeclaration :: List DeclaredFlag -> List #[FlagKind, List String, String]
 _validKeysFromDeclaration = reduce(
@@ -138,21 +85,3 @@ export validate = (declared, parsed) => pipe(
   check(declared),
   (raw) => isEmpty(raw.issues) ? Right(raw.flags) : Left(raw.issues),
 )(parsed)
-
-printIssues :: List Invalid -> String
-export printIssues = pipe(
-  map(
-    where {
-      UnexpectedFlag(f) =>
-        "Unexpected flag " ++ f ++ "."
-
-      ExpectedBoolean(b) =>
-        "Expected boolean flag (" ++ b ++ "), but got string."
-
-      ExpectedString(s) =>
-        "Expected string flag (" ++ s ++ "), but got boolean."
-    },
-  ),
-  String.join("\n\t"),
-  mappend("Errors during parsing.\n\t"),
-)

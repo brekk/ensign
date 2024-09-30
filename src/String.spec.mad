@@ -1,0 +1,17 @@
+import Ortho from "Orthography"
+import { report } from "Study"
+
+import { camelToFlag, camelToKebab, flagToCamel, kebabToCamel, splitLowerKebab } from "@/String"
+
+
+
+report(camelToKebab, "camelToKebab", [#["zipZapZop", "zip-zap-zop"]])
+report(camelToFlag, "camelToFlag", [#["zipZapZop", "--zip-zap-zop"]])
+report(flagToCamel, "flagToCamel", [#["--zip-zap-zop", "zipZapZop"]])
+report(
+  Ortho.destructure(splitLowerKebab),
+  "splitLowerKebab",
+  [#["zipZapZop", ["zip", "zap", "zop"]]],
+)
+
+report(kebabToCamel, "kebabToCamel", [#["zip-zap-zop", "zipZapZop"]])

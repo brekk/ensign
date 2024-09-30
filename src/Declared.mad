@@ -5,7 +5,6 @@ import type { DeclaredFlag, FlagKind } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
 
 import { Left, Right } from "Either"
-import { equals, identity, ifElse } from "Function"
 import IO from "IO"
 import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"

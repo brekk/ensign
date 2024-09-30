@@ -1,7 +1,39 @@
+import { identity, ifElse } from "Function"
+import { length, replace, slice, split, startsWith, toLower, trim } from "String"
+
 import Ortho from "Orthography"
+import { Fusion } from "Orthography/Joiners"
+import { Fission, splitCapitals } from "Orthography/Splitters"
 
 
 
-export _translate = Ortho.translate(Ortho.bidi(Ortho.pairs.kebab, Ortho.pairs.camel))
-export camelToKebab = _translate(true)
-export kebabToCamel = _translate(false)
+// TODO: remove when Orthography adds this
+splitLowerCapitals = (d, xs) => pipe(
+  splitCapitals(d),
+  map(toLower),
+)(xs)
+
+export joinLowerKebab = Fusion("lowerKebab", "-", toLower, toLower)
+export splitLowerKebab = Fission("lowerKebab", "-", splitLowerCapitals)
+
+export lowerKebab = Ortho.Pair(splitLowerKebab, joinLowerKebab)
+
+export _translate = Ortho.translate(Ortho.bidi(lowerKebab, Ortho.pairs.camel))
+export camelToKebab = _translate(false)
+export kebabToCamel = _translate(true)
+
+export camelToFlag = pipe(
+  camelToKebab,
+  mappend("--"),
+)
+
+_sliceAfter = (i, x) => slice(i, length(x), x)
+
+export flagToCamel = ifElse(
+  startsWith("--"),
+  pipe(
+    _sliceAfter(2),
+    kebabToCamel,
+  ),
+  ifElse(startsWith("-"), _sliceAfter(1), identity),
+)

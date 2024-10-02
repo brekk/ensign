@@ -1,15 +1,22 @@
 import type { Either } from "Either"
 
-import type { Invalid } from "@/Declared/Flags"
-import type { DeclaredFlag, FlagKind } from "@/Declared/Flags"
+import type { DeclaredFlag, FlagKind, Invalid } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
 
 import { Left, Right } from "Either"
 import { always, when } from "Function"
-import IO from "IO"
 import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"
 import String from "String"
+
+import { Flag, FlagToggle } from "@/Flags"
+import { camelToKebab, hasCapitals } from "@/String"
+
+
+
+export type DeclaredFlag
+export type FlagKind
+export type Invalid
 
 import {
   DeclaredFlag,
@@ -18,9 +25,36 @@ import {
   FBoolean,
   FString,
   UnexpectedFlag,
+  flagBoolean,
+  flagString,
 } from "@/Declared/Flags"
-import { Flag, FlagToggle } from "@/Flags"
-import { camelToKebab, hasCapitals } from "@/String"
+
+
+
+export DeclaredFlag
+export ExpectedBoolean
+export ExpectedString
+export FBoolean
+export FString
+export UnexpectedFlag
+export flagBoolean
+export flagString
+
+import {
+  flagify,
+  printIssues,
+  printLegend,
+  printMarkdownLegend,
+  printWithRenderer,
+} from "@/Declared/Print"
+
+
+
+export flagify
+export printIssues
+export printLegend
+export printMarkdownLegend
+export printWithRenderer
 
 
 

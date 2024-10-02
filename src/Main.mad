@@ -3,8 +3,8 @@ import IO from "IO"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 
+import { flagBoolean, flagString, validate } from "@/Declared"
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
-import { flagBoolean, flagString, validate } from "@/Legend"
 import { without } from "@/List"
 
 

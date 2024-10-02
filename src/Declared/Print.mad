@@ -41,8 +41,6 @@ _flagBlockWithColor = (useColor, kind, k, als, desc) => `${flagify(k)}${
   isEmpty(als) ? "" : "/ " ++ _summarizeAliasesWithColor(useColor, als)
 }\n  ${kind}\n  ${desc}`
 
-_flagBlock = _flagBlockWithColor(false)
-
 _flagMarkdownBlock :: DeclarationRenderer
 _flagMarkdownBlock = (kind, k, als, desc) => "`"
     ++ flagify(k)
@@ -73,7 +71,7 @@ export printWithRenderer = (render, x) => pipe(
   String.join("\n\n"),
 )(x)
 
-export printLegend = printWithRenderer(_flagBlock)
+export printLegend = printWithRenderer(_flagBlockWithColor(false))
 export printLegendWithColor = printWithRenderer(_flagBlockWithColor(true))
 export printMarkdownLegend = printWithRenderer(_flagMarkdownBlock)
 

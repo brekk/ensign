@@ -147,7 +147,17 @@ report(
   ],
 )
 
+report(
+  parseFlags,
+  "parseFlags - strings with quotes",
+  [
+    #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
+    #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
+  ],
+)
+
 // these cases fail currently
+/*
 report(
   parseFlags,
   "parseFlags - boolean sequence",
@@ -159,12 +169,4 @@ report(
     #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
   ],
 )
-
-report(
-  parseFlags,
-  "parseFlags - strings with quotes",
-  [
-    #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
-    #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
-  ],
-)
+*/

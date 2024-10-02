@@ -1,5 +1,6 @@
 import { Left, Right, mapLeft } from "Either"
-import { lines, split } from "String"
+import { slice } from "List"
+import { join, lines, split, trim } from "String"
 
 import { report } from "Study"
 
@@ -11,7 +12,12 @@ import {
   flagBoolean,
   flagString,
 } from "@/Declared/Flags"
-import { printIssues, printLegend, printMarkdownLegend } from "@/Declared/Print"
+import {
+  printIssues,
+  printLegend,
+  printLegendWithColor,
+  printMarkdownLegend,
+} from "@/Declared/Print"
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
 
 
@@ -144,6 +150,55 @@ report(
         "--zip-zap-zop",
         "  string",
         "  this flag is a camel",
+      ],
+    ],
+  ],
+)
+
+ESC = "\x1b"
+
+report(
+  pipe(
+    printLegendWithColor,
+    lines,
+    slice(0, 2),
+    map(
+      pipe(
+        split(""),
+      ),
+    ),
+  ),
+  "printLegendWithColor",
+  [
+    #[
+      PROGRAM_FLAGS,
+      [
+        [
+          "-",
+          "-",
+          "a",
+          "l",
+          "i",
+          "a",
+          "s",
+          "e",
+          "s",
+          "/",
+          " ",
+          ESC,
+          "[",
+          "3",
+          "3",
+          "m",
+          "-",
+          "a",
+          ESC,
+          "[",
+          "0",
+          "m",
+        ],
+        [" ", " ", "b", "o", "o", "l", "e", "a", "n"],
+        [" ", " ", "a", "l", "i", "a", "s", "e", "s", " ", "t", "o", " ", "u", "s", "e"],
       ],
     ],
   ],

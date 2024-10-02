@@ -44,6 +44,7 @@ import {
   flagify,
   printIssues,
   printLegend,
+  printLegendWithColor,
   printMarkdownLegend,
   printWithRenderer,
 } from "@/Declared/Print"
@@ -53,6 +54,7 @@ import {
 export flagify
 export printIssues
 export printLegend
+export printLegendWithColor
 export printMarkdownLegend
 export printWithRenderer
 

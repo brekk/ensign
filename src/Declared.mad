@@ -5,6 +5,7 @@ import type { DeclaredFlag, FlagKind } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
 
 import { Left, Right } from "Either"
+import { always, when } from "Function"
 import IO from "IO"
 import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"
@@ -19,7 +20,7 @@ import {
   UnexpectedFlag,
 } from "@/Declared/Flags"
 import { Flag, FlagToggle } from "@/Flags"
-import { camelToKebab } from "@/String"
+import { camelToKebab, hasCapitals } from "@/String"
 
 
 
@@ -28,16 +29,18 @@ export alias ParsedValidation = { flags :: List Flag, issues :: List Invalid }
 // constructors
 
 
-// export _autoConvert = (cons, primary, als, desc) => pipe(
-//   camelToKebab,
-//   cons($, map(camelToKebab)(als), desc),
-// )(primary)
 
 _validKeysFromDeclaration :: List DeclaredFlag -> List #[FlagKind, List String, String]
 _validKeysFromDeclaration = reduce(
   (agg, x) => where(x) {
     DeclaredFlag(kind, key, aliases, _) =>
-      append(#[kind, append(key, aliases), key], agg)
+      do {
+        allAliases = pipe(
+          append(key),
+          when(always(hasCapitals(key)), append(camelToKebab(key))),
+        )(aliases)
+        return append(#[kind, allAliases, key], agg)
+      }
   },
   [],
 )

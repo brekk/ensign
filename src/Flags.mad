@@ -9,6 +9,7 @@ import String from "String"
 import O from "Orthography"
 
 import { log } from "@/Log"
+import { stripQuotes } from "@/String"
 
 
 
@@ -62,11 +63,13 @@ export _handleMultipleBooleanFlags = (stack, x) => pipe(
   List.concat(stack),
 )(x)
 
+
+
 _handleStringFlag :: List Flag -> List String -> String -> List Flag
 export _handleStringFlag = (stack, curr, fixed) => where(List.nth(0, curr)) {
   Just(firstCurr) =>
     if (!isFlag(firstCurr)) {
-      List.append(Flag(fixed, firstCurr), stack)
+      List.append(Flag(fixed, stripQuotes(firstCurr)), stack)
     } else {
       stack
     }
@@ -125,7 +128,7 @@ export _updateStack = (stack, maybePrevious, current) => {
           where(previous) {
             [k, v] =>
               isFlag(k) && !isFlag(v)
-                ? List.append(Flag(flagSlug(k), v), stack)
+                ? List.append(Flag(flagSlug(k), stripQuotes(v)), stack)
                 : _handleMultipleBooleanFlags(stack, previous)
 
             [x] =>

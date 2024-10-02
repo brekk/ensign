@@ -37,7 +37,7 @@ _summarizeAliases = _summarizeAliasesWithColor(false)
 
 
 _flagBlockWithColor :: Boolean -> DeclarationRenderer
-_flagBlockWithColor = (useColor, kind, k, als, desc) => `${flagify(k)} ${
+_flagBlockWithColor = (useColor, kind, k, als, desc) => `${flagify(k)}${
   isEmpty(als) ? "" : "/ " ++ _summarizeAliasesWithColor(useColor, als)
 }\n  ${kind}\n  ${desc}`
 

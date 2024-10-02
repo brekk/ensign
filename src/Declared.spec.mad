@@ -1,5 +1,5 @@
 import { Left, Right, mapLeft } from "Either"
-import { split } from "String"
+import { lines, split } from "String"
 
 import { report } from "Study"
 
@@ -53,7 +53,7 @@ report(
       Right([
         Flag("name", "dynne"),
         Flag("description", "works for doctor dischord"),
-        Flag("repo", "\"brekk/dynne\""),
+        Flag("repo", "brekk/dynne"),
         FlagToggle("log", false),
         FlagToggle("git", true),
         Flag("ignore", "curlies"),
@@ -96,50 +96,55 @@ report(
 )
 
 report(
-  printLegend,
+  pipe(
+    printLegend,
+    lines,
+  ),
   "printLegend",
   [
     #[
       PROGRAM_FLAGS,
-      `--aliases / -a
-  boolean
-  aliases to use
-
---git / -g
-  boolean
-  should we process git commands?
-
---log / -l
-  boolean
-  should we log as we go?
-
---description / --desc / -d
-  string
-  a description of the project
-
---ignore / -i
-  string
-  where should we pull the ignore file from?
-
---name / -n
-  string
-  what is the name of the project?
-
---repo / -r
-  string
-  where is the project located?
-
---template / -t
-  string
-  where does the project template live?
-
---special 
-  string
-  this flag is special
-
---zip-zap-zop
-  string
-  this flag is camel`,
+      [
+        "--aliases/ -a",
+        "  boolean",
+        "  aliases to use",
+        "",
+        "--git/ -g",
+        "  boolean",
+        "  should we process git commands?",
+        "",
+        "--log/ -l",
+        "  boolean",
+        "  should we log as we go?",
+        "",
+        "--description/ --desc / -d",
+        "  string",
+        "  a description of the project",
+        "",
+        "--ignore/ -i",
+        "  string",
+        "  where should we pull the ignore file from?",
+        "",
+        "--name/ -n",
+        "  string",
+        "  what is the name of the project?",
+        "",
+        "--repo/ -r",
+        "  string",
+        "  where is the project located?",
+        "",
+        "--template/ -t",
+        "  string",
+        "  where does the project template live?",
+        "",
+        "--special",
+        "  string",
+        "  this flag is special",
+        "",
+        "--zip-zap-zop",
+        "  string",
+        "  this flag is a camel",
+      ],
     ],
   ],
 )
@@ -193,7 +198,7 @@ report(
         "",
         "`--zip-zap-zop`",
         "  *string*",
-        "  this flag is camel",
+        "  this flag is a camel",
       ],
     ],
   ],

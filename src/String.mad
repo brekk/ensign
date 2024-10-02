@@ -1,5 +1,5 @@
 import { identity, ifElse } from "Function"
-import { length, replace, slice, split, startsWith, toLower, trim } from "String"
+import { length, match, replace, slice, split, startsWith, toLower, trim } from "String"
 
 import Ortho from "Orthography"
 import { Fusion } from "Orthography/Joiners"
@@ -19,16 +19,23 @@ export splitLowerKebab = Fission("lowerKebab", "-", splitLowerCapitals)
 export lowerKebab = Ortho.Pair(splitLowerKebab, joinLowerKebab)
 
 export _translate = Ortho.translate(Ortho.bidi(lowerKebab, Ortho.pairs.camel))
+
+camelToKebab :: String -> String
 export camelToKebab = _translate(false)
+
+kebabToCamel :: String -> String
 export kebabToCamel = _translate(true)
 
+camelToFlag :: String -> String
 export camelToFlag = pipe(
   camelToKebab,
   mappend("--"),
 )
 
+_sliceAfter :: Integer -> String -> String
 _sliceAfter = (i, x) => slice(i, length(x), x)
 
+flagToCamel :: String -> String
 export flagToCamel = ifElse(
   startsWith("--"),
   pipe(
@@ -37,3 +44,9 @@ export flagToCamel = ifElse(
   ),
   ifElse(startsWith("-"), _sliceAfter(1), identity),
 )
+
+hasCapitals :: String -> Boolean
+export hasCapitals = match("[A-Z]")
+
+stripQuotes :: String -> String
+export stripQuotes = replace("[\"'`]", "")

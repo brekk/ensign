@@ -12,6 +12,7 @@ import {
   flagify,
   printIssues,
   printLegend,
+  printLegendWithColor,
   printMarkdownLegend,
   printWithRenderer,
   validate,
@@ -68,6 +69,7 @@ export flagString
 export flagify
 export printIssues
 export printLegend
+export printLegendWithColor
 export printMarkdownLegend
 export printWithRenderer
 export validate

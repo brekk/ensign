@@ -42,7 +42,7 @@ _flagBlockWithColor :: Boolean -> DeclarationRenderer
 _flagBlockWithColor = (useColor, kind, k, als, desc) => `${
   (useColor ? IO.green : identity)(flagify(k))
 }${isEmpty(als) ? "" : " / " ++ _summarizeAliasesWithColor(useColor, als)}\n  ${
-  Terminal.text.magenta(kind)
+  (useColor ? Terminal.text.magenta : identity)(kind)
 }\n  ${desc}`
 
 _flagMarkdownBlock :: DeclarationRenderer

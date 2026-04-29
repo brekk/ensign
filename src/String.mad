@@ -1,9 +1,9 @@
 import { identity, ifElse } from "Function"
 import { length, match, replace, slice, split, startsWith, toLower, trim } from "String"
 
-import Ortho from "Orthography"
-import { Fusion } from "Orthography/Joiners"
-import { Fission, splitCapitals } from "Orthography/Splitters"
+import Ortho from "orthography"
+import { Fusion } from "orthography/Joiners"
+import { Fission, splitCapitals } from "orthography/Splitters"
 
 
 
@@ -49,4 +49,4 @@ hasCapitals :: String -> Boolean
 export hasCapitals = match("[A-Z]")
 
 stripQuotes :: String -> String
-export stripQuotes = replace("[\"'`]", "")
+export stripQuotes = replace("[" ++ `"'` ++ "`]", "")

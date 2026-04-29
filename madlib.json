@@ -8,18 +8,21 @@
   "dependencies": [
     {
       "url": "https://github.com/brekk/orthography/archive/refs/tags/v0.0.5.zip",
-      "description": "Orthography",
+      "description": "orthography",
+      "name": "orthography",
       "minVersion": "0.0.5"
     },
     {
-      "url": "https://github.com/brekk/study/archive/refs/tags/v0.0.3.zip",
+      "url": "https://github.com/brekk/study/archive/refs/tags/v0.0.4.zip",
       "description": "Study",
-      "minVersion": "0.0.3"
+      "name": "Study",
+      "minVersion": "0.0.4"
     },
     {
-      "url": "https://github.com/brekk/party-bus/archive/refs/tags/v0.0.3.zip",
+      "url": "https://github.com/brekk/party-bus/archive/refs/tags/v0.0.8.zip",
       "description": "PartyBus",
-      "minVersion": "0.0.3"
+      "name": "PartyBus",
+      "minVersion": "0.0.8"
     }
   ]
 }

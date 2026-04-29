@@ -1,28 +1,25 @@
 {
   "name": "ensign",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "main": "src/Ensign.mad",
   "importAliases": {
     ".": "src"
   },
   "dependencies": [
     {
+      "minVersion": "0.0.5",
       "url": "https://github.com/brekk/orthography/archive/refs/tags/v0.0.5.zip",
-      "description": "orthography",
-      "name": "orthography",
-      "minVersion": "0.0.5"
+      "description": "orthography"
     },
     {
+      "minVersion": "0.0.4",
       "url": "https://github.com/brekk/study/archive/refs/tags/v0.0.4.zip",
-      "description": "Study",
-      "name": "Study",
-      "minVersion": "0.0.4"
+      "description": "Study"
     },
     {
+      "minVersion": "0.0.8",
       "url": "https://github.com/brekk/party-bus/archive/refs/tags/v0.0.8.zip",
-      "description": "PartyBus",
-      "name": "PartyBus",
-      "minVersion": "0.0.8"
+      "description": "PartyBus"
     }
   ]
 }

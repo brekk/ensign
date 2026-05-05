@@ -98,7 +98,6 @@ report(
     #[
       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
       [
-        ,
       // Flag("a", "alpha"),
       // on("b"),
       // on("c"),
@@ -114,5 +113,28 @@ report(
   ],
 )
 
+/*
+report(
+  parseFlags,
+  "parseFlags - strings with quotes",
+  [
+    #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
+    #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
+  ],
+)
+
 // these cases fail currently
 // /*
+report(
+  parseFlags,
+  "parseFlags - boolean sequence",
+  [
+    #[
+      ["--flag", "--flag2", "--yet-another-flag"],
+      [on("flag"), on("flag2"), on("yet-another-flag")],
+    ],
+    #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
+  ],
+)
+
+*/

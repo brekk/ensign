@@ -9,15 +9,6 @@ import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"
 import String from "String"
 
-import { Flag, FlagToggle } from "@/Flags"
-import { camelToKebab, hasCapitals } from "@/String"
-
-
-
-export type DeclaredFlag
-export type FlagKind
-export type Invalid
-
 import {
   DeclaredFlag,
   ExpectedBoolean,
@@ -25,38 +16,9 @@ import {
   FBoolean,
   FString,
   UnexpectedFlag,
-  flagBoolean,
-  flagString,
 } from "@/Declared/Flags"
-
-
-
-export DeclaredFlag
-export ExpectedBoolean
-export ExpectedString
-export FBoolean
-export FString
-export UnexpectedFlag
-export flagBoolean
-export flagString
-
-import {
-  flagify,
-  printIssues,
-  printLegend,
-  printLegendWithColor,
-  printMarkdownLegend,
-  printWithRenderer,
-} from "@/Declared/Print"
-
-
-
-export flagify
-export printIssues
-export printLegend
-export printLegendWithColor
-export printMarkdownLegend
-export printWithRenderer
+import { Flag, FlagToggle } from "@/Flags"
+import { camelToKebab, hasCapitals } from "@/String"
 
 
 

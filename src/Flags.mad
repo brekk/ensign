@@ -6,7 +6,7 @@ import List from "List"
 import { Just, Nothing } from "Maybe"
 import String from "String"
 
-import { log } from "@/Log"
+import Log from "@/Log"
 import { stripQuotes } from "@/String"
 
 
@@ -88,7 +88,7 @@ export _handleOtherFlags = (stack, prev, current) => {
   fixed = flagSlug(prev)
   currentIsSingle = List.length(current) == 1
   return if (isStringFlag(prev) || isShortFlag(prev) && currentIsSingle) do {
-    log.detailStack(IO.green("isStringFlag"), isStringFlag(prev))
+    Log.env.detailStack(IO.green("isStringFlag"), isStringFlag(prev))
     return if (isNegatedFlag(prev)) {
       List.append(FlagToggle(fixed, false), stack)
     } else if (currentIsSingle) {
@@ -96,7 +96,7 @@ export _handleOtherFlags = (stack, prev, current) => {
     } else {
       pipe(
         (f) => {
-          log.detailStack("\tskipping?!?!?", { stack, prev, fixed: f })
+          Log.env.detailStack("\tskipping?!?!?", { stack, prev, fixed: f })
           return f
         },
         _handleBooleanFlag(stack, prev),
@@ -105,7 +105,7 @@ export _handleOtherFlags = (stack, prev, current) => {
   } else {
     pipe(
       (f) => {
-        log.detailStack("\thandling boolean", { stack, prev, fixed: f })
+        Log.env.detailStack("\thandling boolean", { stack, prev, fixed: f })
         return f
       },
       _handleBooleanFlag(stack, prev),
@@ -115,13 +115,13 @@ export _handleOtherFlags = (stack, prev, current) => {
 
 _updateStack :: List Flag -> Maybe (List String) -> List String -> List Flag
 export _updateStack = (stack, maybePrevious, current) => {
-  log.detailStack("▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚", stack)
+  Log.env.detailStack("▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚▚", stack)
   return where(maybePrevious) {
     Just(previous) =>
       do {
         prevLen = List.length(previous)
         return if (prevLen > 2) {
-          _handleMultipleBooleanFlags(stack, previous)
+          Log.env.detailStackDebug("HEY WHAT?", _handleMultipleBooleanFlags(stack, previous))
         } else {
           where(previous) {
             [k, v] =>
@@ -133,13 +133,13 @@ export _updateStack = (stack, maybePrevious, current) => {
               _handleOtherFlags(stack, x, current)
 
             _ =>
-              log.detailStack("\tUNHANDLED CASE!?!?!?", stack)
+              Log.env.detailStack("\tUNHANDLED CASE!?!?!?", stack)
           }
         }
       }
 
     Nothing =>
-      log.detailStack("\tNOTHING CASE!?!?!?", stack)
+      Log.env.detailStack("\tNOTHING CASE!?!?!?", stack)
   }
 }
 

@@ -1,4 +1,5 @@
 import type { Either } from "Either"
+import type { Maybe } from "Maybe"
 
 import type { DeclaredFlag, FlagKind, Invalid } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
@@ -16,8 +17,9 @@ import {
   FBoolean,
   FString,
   UnexpectedFlag,
+  Unparseable,
 } from "@/Declared/Flags"
-import { Flag, FlagToggle } from "@/Flags"
+import { Flag, FlagToggle, InvalidFlag } from "@/Flags"
 import { camelToKebab, hasCapitals } from "@/String"
 
 
@@ -70,17 +72,26 @@ _validator = (lookup, agg, x) => {
             addIssue(UnexpectedFlag(key))
         },
       )(key)
+
+    InvalidFlag =>
+      addIssue(Unparseable)
   }
 }
 
-check :: List DeclaredFlag -> List Flag -> ParsedValidation
-export check = (declared, parsed) => {
-  vkeys = _validKeysFromDeclaration(declared)
-  lookup = (key) => find(where { #[_, keys, _] => includes(key, keys) }, vkeys)
-  return reduce(_validator(lookup), { flags: [], issues: [] }, parsed)
+check :: List DeclaredFlag -> Maybe (List Flag) -> ParsedValidation
+export check = (declared, mParsed) => where(mParsed) {
+  Just(parsed) =>
+    do {
+      vkeys = _validKeysFromDeclaration(declared)
+      lookup = (key) => find(where { #[_, keys, _] => includes(key, keys) }, vkeys)
+      return reduce(_validator(lookup), { flags: [], issues: [] }, parsed)
+    }
+
+  _ =>
+    { issues: [Unparseable], flags: [] }
 }
 
-validate :: List DeclaredFlag -> List Flag -> Either (List Invalid) (List Flag)
+validate :: List DeclaredFlag -> Maybe (List Flag) -> Either (List Invalid) (List Flag)
 export validate = (declared, parsed) => pipe(
   check(declared),
   (raw) => isEmpty(raw.issues) ? Right(raw.flags) : Left(raw.issues),

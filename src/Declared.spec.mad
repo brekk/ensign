@@ -9,6 +9,7 @@ import {
   ExpectedBoolean,
   ExpectedString,
   UnexpectedFlag,
+  Unparseable,
   flagBoolean,
   flagString,
 } from "@/Declared/Flags"
@@ -82,6 +83,11 @@ report(
     #[
       ["--name", "--git=yes", "--no-y"],
       { issues: [ExpectedString("name"), ExpectedBoolean("git"), UnexpectedFlag("y")], flags: [] },
+    ],
+    #[["hohohoho", "ho"], { issues: [Unparseable], flags: [] }],
+    #[
+      ["--good", "at", "--first", "but", "then", "hohohoho", "ho"],
+      { issues: [Unparseable], flags: [] },
     ],
   ],
 )

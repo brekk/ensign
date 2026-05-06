@@ -7,6 +7,7 @@ import {
   FlagToggle,
   InvalidFlag,
   _splitJointFlags,
+  allAreFlags,
   flagSlug,
   isFlag,
   isLongFlag,
@@ -18,6 +19,8 @@ import {
 } from "@/Flags"
 
 
+
+report(allAreFlags, "allAreFlags", [#[[], true]])
 
 report(isLongFlag, "isLongFlag", [#["--cool", true], #["-", false], #["--", true], #["", false]])
 

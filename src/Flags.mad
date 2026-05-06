@@ -32,8 +32,8 @@ isFlag :: String -> Boolean
 export isFlag = (x) => isShortFlag(x) || isLongFlag(x) || isNegatedFlag(x)
 export isNotFlag = Fn.complement(isFlag)
 
-export allFlags = List.all(isLongFlag)
-export noFlags = List.all(isNotFlag)
+export allAreFlags = List.all(isLongFlag)
+export noneAreFlags = List.all(isNotFlag)
 
 flagSlug :: String -> String
 export flagSlug = Fn.when(
@@ -70,7 +70,7 @@ export preParseFlags = (xs) => {
       fixed
 
     #[bone, [a, ...z]] =>
-      if (noFlags(a)) do {
+      if (noneAreFlags(a)) do {
         len = List.length(fixed)
         bod = List.slice(0, len - 2, fixed)
         foot = List.last(a)

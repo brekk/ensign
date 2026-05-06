@@ -45,7 +45,10 @@ _validKeysFromDeclaration = reduce(
   [],
 )
 
-_validator = (lookup, agg, x) => {
+alias Agg = { flags :: List Flag, issues :: List Invalid }
+
+_validator :: (String -> Maybe #[FlagKind, a, String]) -> Agg -> Flag -> Agg
+export _validator = (lookup, agg, x) => {
   addIssue = (i) => ({ flags: agg.flags, issues: append(i, agg.issues) })
   addFlag = (f) => ({ issues: agg.issues, flags: append(f, agg.flags) })
   return where(x) {
@@ -73,6 +76,7 @@ _validator = (lookup, agg, x) => {
         },
       )(key)
 
+    // never happens in practice
     InvalidFlag =>
       addIssue(Unparseable)
   }

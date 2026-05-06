@@ -68,16 +68,26 @@ report(flagSlug, "flagSlug", [#["--dope", "dope"], #["--no-doy", "doy"], #["-h",
 
 flagTest = report(parseFlags)
 
-// flagTest("parseFlags - toggle case", [#[["--flag"], [Just(FlagToggle("flag", true))]]])
-// [Just(FlagToggle("flag", true))]]])
-flagTest("parseFlags - toggle case", [#[["--flag"], []]])
+flagTest("parseFlags - toggle case", [#[["--flag"], [FlagToggle("flag", true)]]])
+
 flagTest(
   "parseFlags - moar",
   [
-    #[["--flag"], []],
+    #[["--flag"], [FlagToggle("flag", true)]],
+    #[["--no-flag"], [FlagToggle("flag", false)]],
     #[
       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
-      [],
+      [
+        Flag("a", "alpha"),
+        on("b"),
+        on("c"),
+        on("d"),
+        on("e"),
+        off("dope"),
+        Flag("cool", "information"),
+        Flag("shit", "yes"),
+        Flag("d", "30"),
+      ],
     ],
     #[
       [
@@ -94,9 +104,23 @@ flagTest(
         "--final",
         "--no-final-final",
       ],
-      [],
+      [
+        Flag("from", "2020"),
+        Flag("to", "2026"),
+        on("v"),
+        on("a"),
+        on("b"),
+        on("c"),
+        Flag("hey", "there"),
+        Flag("what", "up"),
+        on("final"),
+        off("final-final"),
+      ],
     ],
-    #[["--one", "one", "--two", "two", "--three", "three", "--no-four"], []],
+    #[
+      ["--one", "one", "--two", "two", "--three", "three", "--no-four"],
+      [Flag("one", "one"), Flag("two", "two"), Flag("three", "three"), off("four")],
+    ],
     #[
       [
         "--every",
@@ -108,6 +132,7 @@ flagTest(
         "--rotten",
         "--shitty",
         "day",
+        "--whatever=whatever",
         "--who",
         "cares",
         "--bad",
@@ -116,83 +141,48 @@ flagTest(
         "--if",
         "can",
       ],
-      [],
+      [
+        Flag("every", "second"),
+        on("a"),
+        on("b"),
+        on("c"),
+        off("good"),
+        off("magic"),
+        on("terrible"),
+        on("rotten"),
+        Flag("shitty", "day"),
+        Flag("whatever", "whatever"),
+        Flag("who", "cares"),
+        Flag("bad", "bad"),
+        off("can"),
+        Flag("if", "can"),
+      ],
     ],
   ],
 )
 
-// flagTest("parseFlags - string case", [#[["--flag", "value"], [Just(Flag("flag", "value"))]]])
-// flagTest(
-//   "parseFlags",
-//   [
-//     #[
-//       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
-//       map(Just)([
-//         Flag("a", "alpha"),
-//         on("b"),
-//         on("c"),
-//         on("d"),
-//         on("e"),
-//         off("dope"),
-//         Flag("cool", "information"),
-//         Flag("shit", "yes"),
-//         Flag("d", "30"),
-//       ]),
-//     ],
-//   ],
-// )
-//
-// flagTest(
-//   "parseFlags - alt case in case ordering has an affect",
-//   [
-//     #[
-//       [
-//         "--from",
-//         "2020",
-//         "--to",
-//         "2026",
-//         "-v",
-//         "-abc",
-//         "--hey",
-//         "there",
-//         "--what",
-//         "up",
-//         "--final",
-//         "--no-final-final",
-//       ],
-//       map(Just)([
-//         Flag("from", "2020"),
-//         Flag("to", "2026"),
-//         on("v"),
-//         on("a"),
-//         on("b"),
-//         on("c"),
-//         Flag("hey", "there"),
-//         Flag("what", "up"),
-//         on("final"),
-//         off("final-final"),
-//       ]),
-//     ],
-//   ],
-// )
-// report(
-//   parseFlags,
-//   "parseFlags - strings with quotes",
-//   [
-//     #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
-//     #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
-//   ],
-// )
-// these cases fail currently
-// /*
-// report(
-//   parseFlags,
-//   "parseFlags - boolean sequence",
-//   [
-//     #[
-//       ["--flag", "--flag2", "--yet-another-flag"],
-//       [on("flag"), on("flag2"), on("yet-another-flag")],
-//     ],
-//     #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
-//   ],
-// )
+flagTest("parseFlags - string case", [#[["--flag", "value"], [Flag("flag", "value")]]])
+
+report(
+  parseFlags,
+  "parseFlags - strings with quotes",
+  [
+    #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
+    #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
+  ],
+)
+
+report(
+  parseFlags,
+  "parseFlags - boolean sequence",
+  [
+    #[
+      ["--flag", "--flag2", "--yet-another-flag"],
+      [on("flag"), on("flag2"), on("yet-another-flag")],
+    ],
+    #[
+      ["--flag", "--no-dope", "--no-yes", "--yes", "--no-no"],
+      [on("flag"), off("dope"), off("yes"), on("yes"), off("no")],
+    ],
+  ],
+)

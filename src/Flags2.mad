@@ -3,7 +3,7 @@ import type { Maybe } from "Maybe"
 import Fn from "Function"
 import IO from "IO"
 import List from "List"
-import { Just, Nothing, fromMaybe } from "Maybe"
+import { Just, Nothing, fromMaybe, isJust } from "Maybe"
 import String from "String"
 
 import Log from "@/Log"
@@ -11,7 +11,7 @@ import _String from "@/String"
 
 
 
-export type Flag = FlagToggle(String, Boolean) | Flag(String, String)
+export type Flag = FlagToggle(String, Boolean) | Flag(String, String) | InvalidFlag
 
 on :: String -> Flag
 export on = FlagToggle($, true)
@@ -30,8 +30,10 @@ isExclusiveShortFlag = Fn.both(isShortFlag, Fn.complement(isLongFlag))
 
 isFlag :: String -> Boolean
 export isFlag = (x) => isShortFlag(x) || isLongFlag(x) || isNegatedFlag(x)
+export isNotFlag = Fn.complement(isFlag)
 
 export allFlags = List.all(isLongFlag)
+export noFlags = List.all(isNotFlag)
 
 flagSlug :: String -> String
 export flagSlug = Fn.when(
@@ -61,28 +63,31 @@ parseBooleanFlag = (str) => pipe(
 )(str)
 
 
-// parseFlags :: List String -> List (Maybe Flag)
-export parseFlags = (xs) => {
-  helper = (fixed, input) => where(input) {
-    [] =>
+preParseFlags :: List String -> List (List String)
+export preParseFlags = (xs) => {
+  helper = (fixed, input) => where(#[List.last(fixed), input]) {
+    #[_, []] =>
       fixed
 
-    [a, ...z] =>
-      if (List.all(Fn.complement(isFlag), a)) do {
-        bod = List.slice(0, List.length(fixed) - 2, fixed)
-        bone = List.last(fixed)
+    #[bone, [a, ...z]] =>
+      if (noFlags(a)) do {
+        len = List.length(fixed)
+        bod = List.slice(0, len - 2, fixed)
         foot = List.last(a)
-        IO.pTrace("yo", #[bod, bone, foot])
         out = pipe(
           chain(List.last),
           map((x, y) => [x, y]),
           ap($, foot),
           fromMaybe([]),
         )(bone)
-        IO.pTrace("ABBB", out)
+
         // yo = [foot, a]
-        // IO.pTrace("YOYOYO", yo)
-        return helper([...bod, out], z)
+        // this is a hack but let's see if it has repercussions
+        return if (len == 2) {
+          helper([...List.slice(0, -1, bod), out], z)
+        } else {
+          helper([...bod, out], z)
+        }
       } else {
         helper([...fixed, a], z)
       }
@@ -92,3 +97,31 @@ export parseFlags = (xs) => {
   // Log.env.flagParse("post split", ys)
   return helper([], ys)
 }
+
+parseFlags :: List String -> List Flag
+export parseFlags = (xs) => pipe(
+  preParseFlags,
+  chain(
+    (x) => {
+      len = List.length(x)
+      return if (len == 1 || len > 2) {
+        map(
+          pipe(
+            parseBooleanFlag,
+            Just,
+          ),
+          x,
+        )
+      } else {
+        where(x) {
+          [k, v] =>
+            isFlag(k) ? [Just(Flag(flagSlug(k), _String.stripQuotes(v)))] : [Nothing]
+
+          _ =>
+            [Nothing]
+        }
+      }
+    },
+  ),
+  map(fromMaybe(InvalidFlag)),
+)(xs)

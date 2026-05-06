@@ -61,134 +61,34 @@ parseBooleanFlag = (str) => pipe(
 )(str)
 
 
-parseFlags :: List String -> List (Maybe Flag)
+// parseFlags :: List String -> List (Maybe Flag)
 export parseFlags = (xs) => {
-  helper :: List (Maybe Flag) -> Maybe (List String) -> List (List String) -> List (Maybe Flag)
-  helper = (out, prev, input) => where(Log.env.flag("parsing", input)) {
+  helper = (fixed, input) => where(input) {
     [] =>
-      where(prev) {
-        Just(_prev) =>
-          // final case -- close the loop on current
-          if (allFlags(_prev)) {
-            [
-              ...out,
-              pipe(
-                List.first,
-                map(parseBooleanFlag),
-              )(_prev),
-            ]
-          } else {
-            out
-          }
-
-        _ =>
-          out
-      }
+      fixed
 
     [a, ...z] =>
-      where(prev) {
-        Just(_prev) =>
-          do {
-            len2 = List.length(z)
-            len = List.length(a)
-            prevIsFlag = allFlags(_prev)
-            Log.env.flag("hey hey what is a", #[#[a, allFlags(a)], prevIsFlag, #[len, len2]])
-            return if (prevIsFlag) {
-              if (allFlags(a)) {
-                /* prev must be boolean */
-                pipe(
-                  helper(
-                    [
-                      ...out,
-                      pipe(
-                        List.first,
-                        map(parseBooleanFlag),
-                        Log.env.flagBoolean("first case"),
-                      )(_prev),
-                    ],
-                    Just(a),
-                  ),
-                )(z)
-              } else do {
-                output = pipe(
-                  List.first,
-                  map(
-                    pipe(
-                      flagSlug,
-                      Flag,
-                    ),
-                  ),
-                  ap($, List.first(a)),
-                  Log.env.flagParse("second case"),
-                )(_prev)
-                return pipe(
-                  helper([...out, output], Just(a)),
-                )(z)
-              }
-            } else if (List.all(isExclusiveShortFlag, a)) {
-              pipe(
-                Log.env.flagParse("third case"),
-                helper(
-                  [
-                    ...out,
-                    ...map(
-                      pipe(
-                        parseBooleanFlag,
-                        Just,
-                      ),
-                      a,
-                    ),
-                  ],
-                  prev,
-                ),
-              )(z)
-            } else if (List.all(isLongFlag, a)) {
-              pipe(
-                Log.env.flagParse("third case"),
-                helper(
-                  [
-                    ...out,
-                    ...map(
-                      pipe(
-                        parseBooleanFlag,
-                        Just,
-                      ),
-                      a,
-                    ),
-                  ],
-                  prev,
-                ),
-              )(z)
-            } else if (prevIsFlag && List.all(Fn.complement(isFlag), a)) {
-              pipe(
-                Log.env.flagParse("string non flag case"),
-                helper(out, prev),
-              )(z)
-            } else do {
-              Log.env.flagParse("@@@", #[out, prev, a])
-              return pipe(
-                Log.env.flagParse("forf case"),
-                helper(out, prev),
-              )(z)
-            }
-          }
-
-        _ =>
-          do {
-            flagPartLength = List.length(input)
-            Log.env.flagParse("no prev", #[a, z])
-            Log
-              .env
-              .flag("NO PREV, WHAT", #[a, allFlags(a), List.all(isShortFlag, a), flagPartLength])
-            return pipe(
-              Log.env.flagParse("one"),
-              helper(out, Just(a)),
-            )(z)
-          }
+      if (List.all(Fn.complement(isFlag), a)) do {
+        bod = List.slice(0, List.length(fixed) - 2, fixed)
+        bone = List.last(fixed)
+        foot = List.last(a)
+        IO.pTrace("yo", #[bod, bone, foot])
+        out = pipe(
+          chain(List.last),
+          map((x, y) => [x, y]),
+          ap($, foot),
+          fromMaybe([]),
+        )(bone)
+        IO.pTrace("ABBB", out)
+        // yo = [foot, a]
+        // IO.pTrace("YOYOYO", yo)
+        return helper([...bod, out], z)
+      } else {
+        helper([...fixed, a], z)
       }
   }
-  Log.env.flagParse("hey", xs)
+  // Log.env.flagParse("hey", xs)
   ys = map(_splitJointFlags, xs)
-  Log.env.flagParse("post split", ys)
-  return helper([], Nothing, ys)
+  // Log.env.flagParse("post split", ys)
+  return helper([], ys)
 }

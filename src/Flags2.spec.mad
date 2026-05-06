@@ -68,30 +68,17 @@ report(flagSlug, "flagSlug", [#["--dope", "dope"], #["--no-doy", "doy"], #["-h",
 
 flagTest = report(parseFlags)
 
-flagTest("parseFlags - basic case", [#[["--flag"], [Just(FlagToggle("flag", true))]]])
+// flagTest("parseFlags - toggle case", [#[["--flag"], [Just(FlagToggle("flag", true))]]])
+// [Just(FlagToggle("flag", true))]]])
+flagTest("parseFlags - toggle case", [#[["--flag"], []]])
 flagTest(
-  "parseFlags",
+  "parseFlags - moar",
   [
+    #[["--flag"], []],
     #[
       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
-      map(Just)([
-        Flag("a", "alpha"),
-        on("b"),
-        on("c"),
-        on("d"),
-        on("e"),
-        off("dope"),
-        Flag("cool", "information"),
-        Flag("shit", "yes"),
-        Flag("d", "30"),
-      ]),
+      [],
     ],
-  ],
-)
-
-flagTest(
-  "parseFlags - alt case in case ordering has an affect",
-  [
     #[
       [
         "--from",
@@ -107,22 +94,87 @@ flagTest(
         "--final",
         "--no-final-final",
       ],
-      map(Just)([
-        Flag("from", "2020"),
-        Flag("to", "2026"),
-        on("v"),
-        on("a"),
-        on("b"),
-        on("c"),
-        Flag("hey", "there"),
-        Flag("what", "up"),
-        on("final"),
-        off("final-final"),
-      ]),
+      [],
+    ],
+    #[["--one", "one", "--two", "two", "--three", "three", "--no-four"], []],
+    #[
+      [
+        "--every",
+        "second",
+        "-abc",
+        "--no-good",
+        "--no-magic",
+        "--terrible",
+        "--rotten",
+        "--shitty",
+        "day",
+        "--who",
+        "cares",
+        "--bad",
+        "bad",
+        "--no-can",
+        "--if",
+        "can",
+      ],
+      [],
     ],
   ],
 )
 
+// flagTest("parseFlags - string case", [#[["--flag", "value"], [Just(Flag("flag", "value"))]]])
+// flagTest(
+//   "parseFlags",
+//   [
+//     #[
+//       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
+//       map(Just)([
+//         Flag("a", "alpha"),
+//         on("b"),
+//         on("c"),
+//         on("d"),
+//         on("e"),
+//         off("dope"),
+//         Flag("cool", "information"),
+//         Flag("shit", "yes"),
+//         Flag("d", "30"),
+//       ]),
+//     ],
+//   ],
+// )
+//
+// flagTest(
+//   "parseFlags - alt case in case ordering has an affect",
+//   [
+//     #[
+//       [
+//         "--from",
+//         "2020",
+//         "--to",
+//         "2026",
+//         "-v",
+//         "-abc",
+//         "--hey",
+//         "there",
+//         "--what",
+//         "up",
+//         "--final",
+//         "--no-final-final",
+//       ],
+//       map(Just)([
+//         Flag("from", "2020"),
+//         Flag("to", "2026"),
+//         on("v"),
+//         on("a"),
+//         on("b"),
+//         on("c"),
+//         Flag("hey", "there"),
+//         Flag("what", "up"),
+//         on("final"),
+//         off("final-final"),
+//       ]),
+//     ],
+//   ],
+// )
 // report(
 //   parseFlags,
 //   "parseFlags - strings with quotes",

@@ -1,0 +1,12 @@
+ensign
+ - flag
+ - flag:parse
+ - flag:boolean
+ - flag:string
+ - flag:stack
+ - detail
+ - detail:stack
+ - detail:stack:debug
+ - error
+ - tag
+ - validate

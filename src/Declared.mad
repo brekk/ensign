@@ -1,4 +1,5 @@
 import type { Either } from "Either"
+import type { Maybe } from "Maybe"
 
 import type { DeclaredFlag, FlagKind, Invalid } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
@@ -9,15 +10,6 @@ import { append, find, includes, isEmpty, reduce } from "List"
 import { Just } from "Maybe"
 import String from "String"
 
-import { Flag, FlagToggle } from "@/Flags"
-import { camelToKebab, hasCapitals } from "@/String"
-
-
-
-export type DeclaredFlag
-export type FlagKind
-export type Invalid
-
 import {
   DeclaredFlag,
   ExpectedBoolean,
@@ -25,38 +17,10 @@ import {
   FBoolean,
   FString,
   UnexpectedFlag,
-  flagBoolean,
-  flagString,
+  Unparseable,
 } from "@/Declared/Flags"
-
-
-
-export DeclaredFlag
-export ExpectedBoolean
-export ExpectedString
-export FBoolean
-export FString
-export UnexpectedFlag
-export flagBoolean
-export flagString
-
-import {
-  flagify,
-  printIssues,
-  printLegend,
-  printLegendWithColor,
-  printMarkdownLegend,
-  printWithRenderer,
-} from "@/Declared/Print"
-
-
-
-export flagify
-export printIssues
-export printLegend
-export printLegendWithColor
-export printMarkdownLegend
-export printWithRenderer
+import { Flag, FlagToggle, InvalidFlag } from "@/Flags"
+import { camelToKebab, hasCapitals } from "@/String"
 
 
 
@@ -81,7 +45,10 @@ _validKeysFromDeclaration = reduce(
   [],
 )
 
-_validator = (lookup, agg, x) => {
+alias Agg = { flags :: List Flag, issues :: List Invalid }
+
+_validator :: (String -> Maybe #[FlagKind, a, String]) -> Agg -> Flag -> Agg
+export _validator = (lookup, agg, x) => {
   addIssue = (i) => ({ flags: agg.flags, issues: append(i, agg.issues) })
   addFlag = (f) => ({ issues: agg.issues, flags: append(f, agg.flags) })
   return where(x) {
@@ -108,17 +75,27 @@ _validator = (lookup, agg, x) => {
             addIssue(UnexpectedFlag(key))
         },
       )(key)
+
+    // never happens in practice
+    InvalidFlag =>
+      addIssue(Unparseable)
   }
 }
 
-check :: List DeclaredFlag -> List Flag -> ParsedValidation
-export check = (declared, parsed) => {
-  vkeys = _validKeysFromDeclaration(declared)
-  lookup = (key) => find(where { #[_, keys, _] => includes(key, keys) }, vkeys)
-  return reduce(_validator(lookup), { flags: [], issues: [] }, parsed)
+check :: List DeclaredFlag -> Maybe (List Flag) -> ParsedValidation
+export check = (declared, mParsed) => where(mParsed) {
+  Just(parsed) =>
+    do {
+      vkeys = _validKeysFromDeclaration(declared)
+      lookup = (key) => find(where { #[_, keys, _] => includes(key, keys) }, vkeys)
+      return reduce(_validator(lookup), { flags: [], issues: [] }, parsed)
+    }
+
+  _ =>
+    { issues: [Unparseable], flags: [] }
 }
 
-validate :: List DeclaredFlag -> List Flag -> Either (List Invalid) (List Flag)
+validate :: List DeclaredFlag -> Maybe (List Flag) -> Either (List Invalid) (List Flag)
 export validate = (declared, parsed) => pipe(
   check(declared),
   (raw) => isEmpty(raw.issues) ? Right(raw.flags) : Left(raw.issues),

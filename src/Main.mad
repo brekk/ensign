@@ -3,7 +3,8 @@ import IO from "IO"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 
-import { flagBoolean, flagString, validate } from "@/Declared"
+import { validate } from "@/Declared"
+import { flagBoolean, flagString } from "@/Declared/Flags"
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
 import { without } from "@/List"
 
@@ -19,6 +20,8 @@ main = (args) => {
     flagString("name", ["n"], "what is the name of the project?"),
     flagString("repo", ["r"], "where is the project located?"),
     flagString("template", ["t"], "where does the project template live?"),
+    flagBoolean("auto", ["A"], "automatic"),
+    flagBoolean("force", ["f"], "force"),
   ]
 
   pipe(
@@ -29,5 +32,5 @@ main = (args) => {
 }
 
 /*
-madlib run src/Main.mad -- -n "dynne" -d "works for doctor dischord" --repo=brekk/dynne --no-log --no-git -i=curlies
+madlib run src/Main.mad -- -n "dynne" -d "works for doctor dischord" --repo=brekk/dynne --no-log --no-git -i=curlies --auto --force
 */

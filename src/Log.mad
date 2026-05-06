@@ -1,19 +1,50 @@
+/* ★★★ ensign@0.0.16 ★★★
+ * THIS FILE AUTOMATICALLY GENERATED FROM SOURCE: ensign.clowncar
+ */
+
 import Party from "PartyBus"
 
 
 
-export LOGS = {
+export tags = {
+  ensign: Party.tag("ensign"),
+  flag: Party.tagWithScope("ensign", ["flag"]),
+  flagParse: Party.tagWithScope("ensign", ["flag", "parse"]),
+  flagBoolean: Party.tagWithScope("ensign", ["flag", "boolean"]),
+  flagString: Party.tagWithScope("ensign", ["flag", "string"]),
+  flagStack: Party.tagWithScope("ensign", ["flag", "stack"]),
   detail: Party.tagWithScope("ensign", ["detail"]),
   detailStack: Party.tagWithScope("ensign", ["detail", "stack"]),
+  detailStackDebug: Party.tagWithScope("ensign", ["detail", "stack", "debug"]),
   error: Party.tagWithScope("ensign", ["error"]),
   tag: Party.tagWithScope("ensign", ["tag"]),
   validate: Party.tagWithScope("ensign", ["validate"]),
 }
-
-export log = {
-  detail: Party.env(LOGS.detail),
-  detailStack: Party.env(LOGS.detailStack),
-  error: Party.env(LOGS.error),
-  tag: Party.env(LOGS.tag),
-  validate: Party.env(LOGS.validate),
+export env = {
+  ensign: Party.env(tags.ensign),
+  flag: Party.env(tags.flag),
+  flagParse: Party.env(tags.flagParse),
+  flagBoolean: Party.env(tags.flagBoolean),
+  flagString: Party.env(tags.flagString),
+  flagStack: Party.env(tags.flagStack),
+  detail: Party.env(tags.detail),
+  detailStack: Party.env(tags.detailStack),
+  detailStackDebug: Party.env(tags.detailStackDebug),
+  error: Party.env(tags.error),
+  tag: Party.env(tags.tag),
+  validate: Party.env(tags.validate),
+}
+export tapped = {
+  ensign: Party.tap(env.ensign),
+  flag: Party.tap(env.flag),
+  flagParse: Party.tap(env.flagParse),
+  flagBoolean: Party.tap(env.flagBoolean),
+  flagString: Party.tap(env.flagString),
+  flagStack: Party.tap(env.flagStack),
+  detail: Party.tap(env.detail),
+  detailStack: Party.tap(env.detailStack),
+  detailStackDebug: Party.tap(env.detailStackDebug),
+  error: Party.tap(env.error),
+  tag: Party.tap(env.tag),
+  validate: Party.tap(env.validate),
 }

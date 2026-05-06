@@ -1,14 +1,16 @@
 import { Left, Right, mapLeft } from "Either"
 import { slice } from "List"
+import { Just, Nothing } from "Maybe"
 import { join, lines, split, trim } from "String"
 
-import { report } from "Study"
+import { caseN3, report } from "Study"
 
-import { check, validate } from "@/Declared"
+import { _validator, check, validate } from "@/Declared"
 import {
   ExpectedBoolean,
   ExpectedString,
   UnexpectedFlag,
+  Unparseable,
   flagBoolean,
   flagString,
 } from "@/Declared/Flags"
@@ -18,7 +20,7 @@ import {
   printLegendWithColor,
   printMarkdownLegend,
 } from "@/Declared/Print"
-import { Flag, FlagToggle, parseFlags } from "@/Flags"
+import { Flag, FlagToggle, InvalidFlag, parseFlags } from "@/Flags"
 
 
 
@@ -46,6 +48,17 @@ VALID_INPUTS = [
   "-i=curlies",
   "--zip-zap-zop=noice",
 ]
+
+report(
+  caseN3(_validator),
+  "_validator",
+  [
+    #[
+      #[(_) => Nothing, { flags: [], issues: [] }, InvalidFlag],
+      { flags: [], issues: [Unparseable] },
+    ],
+  ],
+)
 
 report(
   pipe(
@@ -82,6 +95,11 @@ report(
     #[
       ["--name", "--git=yes", "--no-y"],
       { issues: [ExpectedString("name"), ExpectedBoolean("git"), UnexpectedFlag("y")], flags: [] },
+    ],
+    #[["hohohoho", "ho"], { issues: [Unparseable], flags: [] }],
+    #[
+      ["--good", "at", "--first", "but", "then", "hohohoho", "ho"],
+      { issues: [Unparseable], flags: [] },
     ],
   ],
 )

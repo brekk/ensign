@@ -8,6 +8,11 @@ import Party from "PartyBus"
 
 export tags = {
   ensign: Party.tag("ensign"),
+  flag: Party.tagWithScope("ensign", ["flag"]),
+  flagParse: Party.tagWithScope("ensign", ["flag", "parse"]),
+  flagBoolean: Party.tagWithScope("ensign", ["flag", "boolean"]),
+  flagString: Party.tagWithScope("ensign", ["flag", "string"]),
+  flagStack: Party.tagWithScope("ensign", ["flag", "stack"]),
   detail: Party.tagWithScope("ensign", ["detail"]),
   detailStack: Party.tagWithScope("ensign", ["detail", "stack"]),
   detailStackDebug: Party.tagWithScope("ensign", ["detail", "stack", "debug"]),
@@ -17,6 +22,11 @@ export tags = {
 }
 export env = {
   ensign: Party.env(tags.ensign),
+  flag: Party.env(tags.flag),
+  flagParse: Party.env(tags.flagParse),
+  flagBoolean: Party.env(tags.flagBoolean),
+  flagString: Party.env(tags.flagString),
+  flagStack: Party.env(tags.flagStack),
   detail: Party.env(tags.detail),
   detailStack: Party.env(tags.detailStack),
   detailStackDebug: Party.env(tags.detailStackDebug),
@@ -26,6 +36,11 @@ export env = {
 }
 export tapped = {
   ensign: Party.tap(env.ensign),
+  flag: Party.tap(env.flag),
+  flagParse: Party.tap(env.flagParse),
+  flagBoolean: Party.tap(env.flagBoolean),
+  flagString: Party.tap(env.flagString),
+  flagStack: Party.tap(env.flagStack),
   detail: Party.tap(env.detail),
   detailStack: Party.tap(env.detailStack),
   detailStackDebug: Party.tap(env.detailStackDebug),

@@ -4,14 +4,13 @@ import { caseN2, caseN3, report } from "Study"
 
 import {
   Flag,
-  _handleBooleanFlag,
-  _handleStringFlag,
+  FlagToggle,
   _splitJointFlags,
   flagSlug,
   isFlag,
+  isLongFlag,
   isNegatedFlag,
   isShortFlag,
-  isStringFlag,
   off,
   on,
   parseFlags,
@@ -19,11 +18,7 @@ import {
 
 
 
-report(
-  isStringFlag,
-  "isStringFlag",
-  [#["--cool", true], #["-", false], #["--", true], #["", false]],
-)
+report(isLongFlag, "isLongFlag", [#["--cool", true], #["-", false], #["--", true], #["", false]])
 
 report(
   isNegatedFlag,
@@ -68,51 +63,84 @@ report(
   ],
 )
 
-report(
-  caseN3(_handleStringFlag),
-  "_handleStringFlag",
-  [
-    #[#[[], ["--nice"], "cool"], []],
-    #[#[[off("nah"), on("whatever")], [], "cool"], [off("nah"), on("whatever")]],
-    #[#[[off("nope")], ["hey"], "cool"], [off("nope"), Flag("cool", "hey")]],
-  ],
-)
-
-report(
-  caseN3(_handleBooleanFlag),
-  "_handleBooleanFlag",
-  [
-    #[#[[], "--nice", "cool"], [on("cool")]],
-    #[#[[off("hey")], "no", ""], [off("hey")]],
-    #[#[[off("hey")], "--no-nope", "zip"], [off("hey"), off("zip")]],
-  ],
-)
 
 report(flagSlug, "flagSlug", [#["--dope", "dope"], #["--no-doy", "doy"], #["-h", "h"], #["x", "x"]])
 
+flagTest = report(parseFlags)
 
-report(
-  parseFlags,
+flagTest("parseFlags - basic case", [#[["--flag"], [Just(FlagToggle("flag", true))]]])
+flagTest(
   "parseFlags",
   [
     #[
       ["-a", "alpha", "-b", "-cde", "--no-dope", "--cool", "information", "--shit=yes", "-d=30"],
-      [
-        ,
-      // Flag("a", "alpha"),
-      // on("b"),
-      // on("c"),
-      // on("d"),
-      // on("e"),
-      // off("dope"),
-      // Flag("cool", "information"),
-      // Flag("shit", "yes"),
-      // Flag("d", "30"),
-      ],
+      map(Just)([
+        Flag("a", "alpha"),
+        on("b"),
+        on("c"),
+        on("d"),
+        on("e"),
+        off("dope"),
+        Flag("cool", "information"),
+        Flag("shit", "yes"),
+        Flag("d", "30"),
+      ]),
     ],
-    #[["--flag"], [on("flag")]],
   ],
 )
 
+flagTest(
+  "parseFlags - alt case in case ordering has an affect",
+  [
+    #[
+      [
+        "--from",
+        "2020",
+        "--to",
+        "2026",
+        "-v",
+        "-abc",
+        "--hey",
+        "there",
+        "--what",
+        "up",
+        "--final",
+        "--no-final-final",
+      ],
+      map(Just)([
+        Flag("from", "2020"),
+        Flag("to", "2026"),
+        on("v"),
+        on("a"),
+        on("b"),
+        on("c"),
+        Flag("hey", "there"),
+        Flag("what", "up"),
+        on("final"),
+        off("final-final"),
+      ]),
+    ],
+  ],
+)
+
+// report(
+//   parseFlags,
+//   "parseFlags - strings with quotes",
+//   [
+//     #[["--flag='nice cool hooray'"], [Flag("flag", "nice cool hooray")]],
+//     #[[`--info="this is a whole sentence"`], [Flag("info", "this is a whole sentence")]],
+//   ],
+// )
 // these cases fail currently
 // /*
+// report(
+//   parseFlags,
+//   "parseFlags - boolean sequence",
+//   [
+//     #[
+//       ["--flag", "--flag2", "--yet-another-flag"],
+//       [on("flag"), on("flag2"), on("yet-another-flag")],
+//     ],
+//     #[["--flag", "--no-dope"], [on("flag"), off("dope")]],
+//   ],
+// )

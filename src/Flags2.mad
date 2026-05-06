@@ -17,8 +17,8 @@ on :: String -> Flag
 export on = FlagToggle($, true)
 export off = FlagToggle($, false)
 
-isStringFlag :: String -> Boolean
-export isStringFlag = String.startsWith("--")
+isLongFlag :: String -> Boolean
+export isLongFlag = String.startsWith("--")
 
 isNegatedFlag :: String -> Boolean
 export isNegatedFlag = String.startsWith("--no-")
@@ -26,13 +26,17 @@ export isNegatedFlag = String.startsWith("--no-")
 isShortFlag :: String -> Boolean
 export isShortFlag = String.startsWith("-")
 
+isExclusiveShortFlag = Fn.both(isShortFlag, Fn.complement(isLongFlag))
+
 isFlag :: String -> Boolean
-export isFlag = (x) => isShortFlag(x) || isStringFlag(x) || isNegatedFlag(x)
+export isFlag = (x) => isShortFlag(x) || isLongFlag(x) || isNegatedFlag(x)
+
+export allFlags = List.all(isLongFlag)
 
 flagSlug :: String -> String
 export flagSlug = Fn.when(
   isFlag,
-  Fn.ifElse(isNegatedFlag, String.drop(5), Fn.ifElse(isStringFlag, String.drop(2), String.drop(1))),
+  Fn.ifElse(isNegatedFlag, String.drop(5), Fn.ifElse(isLongFlag, String.drop(2), String.drop(1))),
 )
 
 _splitJointFlags :: String -> List String
@@ -40,7 +44,7 @@ export _splitJointFlags = Fn.ifElse(
   String.includes('='),
   String.split("="),
   Fn.ifElse(
-    Fn.both(isShortFlag, Fn.complement(isStringFlag)),
+    isExclusiveShortFlag,
     pipe(
       String.drop(1),
       String.split(""),
@@ -50,85 +54,141 @@ export _splitJointFlags = Fn.ifElse(
   ),
 )
 
-_handleStringFlag :: List Flag -> List String -> String -> List Flag
-export _handleStringFlag = (stack, curr, fixed) => pipe(
-  List.nth(0),
-  map(
-    Fn.ifElse(
-      Fn.complement(isFlag),
-      pipe(
-        _String.stripQuotes,
-        Flag(fixed),
-        List.append($, stack),
-      ),
-      (_) => stack,
-    ),
-  ),
-  fromMaybe(stack),
-)(curr)
-
-_handleBooleanFlag :: List Flag -> String -> String -> List Flag
-export _handleBooleanFlag = (stack, prev, fixed) => Fn.ifElse(
-  isFlag,
-  pipe(
-    Fn.complement(isNegatedFlag),
-    FlagToggle(fixed),
-    List.append($, stack),
-  ),
-  (_) => stack,
-)(prev)
-
 parseBooleanFlag :: String -> Flag
 parseBooleanFlag = (str) => pipe(
   Fn.complement(isNegatedFlag),
   FlagToggle(flagSlug(str)),
 )(str)
 
+
 parseFlags :: List String -> List (Maybe Flag)
 export parseFlags = (xs) => {
   helper :: List (Maybe Flag) -> Maybe (List String) -> List (List String) -> List (Maybe Flag)
-  helper = (out, current, input) => where(input) {
+  helper = (out, prev, input) => where(Log.env.flag("parsing", input)) {
     [] =>
-      out
+      where(prev) {
+        Just(_prev) =>
+          // final case -- close the loop on current
+          if (allFlags(_prev)) {
+            [
+              ...out,
+              pipe(
+                List.first,
+                map(parseBooleanFlag),
+              )(_prev),
+            ]
+          } else {
+            out
+          }
+
+        _ =>
+          out
+      }
 
     [a, ...z] =>
-      where(current) {
-        Just(prev) =>
+      where(prev) {
+        Just(_prev) =>
           do {
-            len = List.length(input)
-            len2 = List.length(a)
-            return if (len == 1 && len2 == 1) do {
-              return if (List.all(isFlag, prev) && List.all(isFlag, a)) {
+            len2 = List.length(z)
+            len = List.length(a)
+            prevIsFlag = allFlags(_prev)
+            Log.env.flag("hey hey what is a", #[#[a, allFlags(a)], prevIsFlag, #[len, len2]])
+            return if (prevIsFlag) {
+              if (allFlags(a)) {
                 /* prev must be boolean */
+                pipe(
+                  helper(
+                    [
+                      ...out,
+                      pipe(
+                        List.first,
+                        map(parseBooleanFlag),
+                        Log.env.flagBoolean("first case"),
+                      )(_prev),
+                    ],
+                    Just(a),
+                  ),
+                )(z)
+              } else do {
+                output = pipe(
+                  List.first,
+                  map(
+                    pipe(
+                      flagSlug,
+                      Flag,
+                    ),
+                  ),
+                  ap($, List.first(a)),
+                  Log.env.flagParse("second case"),
+                )(_prev)
+                return pipe(
+                  helper([...out, output], Just(a)),
+                )(z)
+              }
+            } else if (List.all(isExclusiveShortFlag, a)) {
+              pipe(
+                Log.env.flagParse("third case"),
                 helper(
                   [
                     ...out,
-                    pipe(
-                      List.first,
-                      map(parseBooleanFlag),
-                    )(prev),
+                    ...map(
+                      pipe(
+                        parseBooleanFlag,
+                        Just,
+                      ),
+                      a,
+                    ),
                   ],
-                  Just(a),
-                  z,
-                )
-              } else {
-                helper(out, Just(a), z)
-              }
-            } else {
-              helper(out, current, z)
+                  prev,
+                ),
+              )(z)
+            } else if (List.all(isLongFlag, a)) {
+              pipe(
+                Log.env.flagParse("third case"),
+                helper(
+                  [
+                    ...out,
+                    ...map(
+                      pipe(
+                        parseBooleanFlag,
+                        Just,
+                      ),
+                      a,
+                    ),
+                  ],
+                  prev,
+                ),
+              )(z)
+            } else if (prevIsFlag && List.all(Fn.complement(isFlag), a)) {
+              pipe(
+                Log.env.flagParse("string non flag case"),
+                helper(out, prev),
+              )(z)
+            } else do {
+              Log.env.flagParse("@@@", #[out, prev, a])
+              return pipe(
+                Log.env.flagParse("forf case"),
+                helper(out, prev),
+              )(z)
             }
           }
 
         _ =>
           do {
             flagPartLength = List.length(input)
-            return if (flagPartLength == 1) {
-              helper(out, Just(a), z)
-            } else {
-              helper(out, current, z)
-            }
+            Log.env.flagParse("no prev", #[a, z])
+            Log
+              .env
+              .flag("NO PREV, WHAT", #[a, allFlags(a), List.all(isShortFlag, a), flagPartLength])
+            return pipe(
+              Log.env.flagParse("one"),
+              helper(out, Just(a)),
+            )(z)
           }
       }
   }
-  return helper([], Nothing, map(_splitJointFlags, xs))
+  Log.env.flagParse("hey", xs)
+  ys = map(_splitJointFlags, xs)
+  Log.env.flagParse("post split", ys)
+  return helper([], Nothing, ys)
 }

@@ -1,36 +1,128 @@
+import type { Maybe } from "Maybe"
+
+import type { Flag } from "@/Flags"
+
 import Dict from "Dictionary"
+import Either from "Either"
+import Fn from "Function"
 import IO from "IO"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 
 import { validate } from "@/Declared"
 import { flagBoolean, flagString } from "@/Declared/Flags"
+import Ensign from "@/Ensign"
 import { Flag, FlagToggle, parseFlags } from "@/Flags"
 import { without } from "@/List"
 
 
 
-main = (args) => {
-  PROGRAM_FLAGS = [
-    flagBoolean("aliases", ["a"], "aliases to use"),
-    flagBoolean("git", ["g"], "should we process git commands?"),
-    flagBoolean("log", ["l"], "should we log as we go?"),
-    flagString("description", ["desc", "d"], "a description of the project"),
-    flagString("ignore", ["i"], "where should we pull the ignore file from?"),
-    flagString("name", ["n"], "what is the name of the project?"),
-    flagString("repo", ["r"], "where is the project located?"),
-    flagString("template", ["t"], "where does the project template live?"),
-    flagBoolean("auto", ["A"], "automatic"),
-    flagBoolean("force", ["f"], "force"),
-  ]
+PIZZA_FLAGS = [
+  flagBoolean("help", ["h"], "Display help text"),
+  flagString("name", ["n"], "Name for the order"),
+  flagBoolean("gluten-free", ["gf"], "Make this gluten free!"),
+  flagString("base", ["b"], "What sauce base should we use?"),
+  flagString("cheese", ["c"], "What cheese should we use?"),
+  flagString("topping", ["t"], "What topping(s) do you want?"),
+  flagString("size", ["s"], "What size pizza should this be?"),
+]
 
+alias PizzaOrder = {
+  base :: Maybe String,
+  cheese :: Maybe String,
+  help :: Boolean,
+  isGlutenFree :: Boolean,
+  name :: Maybe String,
+  size :: Maybe Integer,
+  toppings :: List String,
+}
+INITIAL_STATE :: PizzaOrder
+INITIAL_STATE = {
+  help: false,
+  name: Nothing,
+  isGlutenFree: false,
+  base: Just("red sauce"),
+  cheese: Just("mozzarella"),
+  toppings: [],
+  size: Just(3),
+}
+
+
+captureTheFlag :: PizzaOrder -> Flag -> #[Boolean, PizzaOrder]
+captureTheFlag = (state, flag) => where(flag) {
+  Flag(k, v) =>
+    if (k == "name") {
+      #[false, { ...state, name: Just(v) }]
+    } else if (k == "base") {
+      #[false, { ...state, base: Just(v) }]
+    } else if (k == "cheese") {
+      #[false, { ...state, base: Just(v) }]
+    } else if (k == "topping") {
+      #[false, { ...state, toppings: [...state.toppings, v] }]
+    } else if (k == "size") {
+      #[false, { ...state, size: scan(v) }]
+    } else {
+      #[false, state]
+    }
+
+  FlagToggle(k, v) =>
+    if (k == "help") {
+      // exclusive / short-circuiting
+      #[true, { ...state, help: v }]
+    } else if (k == "gluten-free") {
+      #[false, { ...state, isGlutenFree: v }]
+    } else {
+      #[false, state]
+    }
+
+  _ =>
+    #[false, state]
+}
+
+processFlagState :: PizzaOrder
+  -> (PizzaOrder -> Flag -> #[Boolean, PizzaOrder])
+  -> List Flag
+  -> PizzaOrder
+processFlagState = (state, process, flags) => {
+  walker = (done, aggState, toProcess) => if (done) {
+    aggState
+  } else {
+    where(toProcess) {
+      [] =>
+        aggState
+
+      [a, ...z] =>
+        where(process(aggState, a)) {
+          #[stop, upState] =>
+            walker(stop, upState, z)
+        }
+    }
+  }
+  return walker(false, state, flags)
+}
+
+main = (args) => {
   pipe(
-    parseFlags,
-    validate(PROGRAM_FLAGS),
-    IO.pTrace("output!"),
+    /* drop the first value, that's the name of this file */
+    List.drop(1),
+    IO.pTrace("hi, whaddaya want?"),
+    /* given the flags we wanna match against, compare them to the given arguments */
+    Ensign.readArgs(PIZZA_FLAGS),
+    IO.pTrace("lemme read that back"),
+    /* fold over our flags to build an initial state */
+    map(processFlagState(INITIAL_STATE, captureTheFlag)),
+    chain((x) => x.help ? Either.Left(Ensign.helpWithColor(false, PIZZA_FLAGS)) : Either.Right(x)),
+    IO.pTrace("order up"),
+    /* we can jump back out of Either if we want, */
+    /* by rolling back to the previous state as a fallback */
+    // Either.fromRight(INITIAL_STATE),
+    bimap(IO.putLine, IO.pTrace("Final output")),
   )(args)
 }
 
 /*
-madlib run src/Main.mad -- -n "dynne" -d "works for doctor dischord" --repo=brekk/dynne --no-log --no-git -i=curlies --auto --force
+// valid input
+madlib run src/Main.mad -- --name Pizzapants -t pepperoni -s 4 -t corn -t habanero --no-gf
+// invalid input
+madlib run src/Main.mad -- --name Madness -t pepperoni -s xl --hey there
 */

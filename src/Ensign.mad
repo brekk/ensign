@@ -1,5 +1,4 @@
 import type { Either } from "Either"
-import type { Maybe } from "Maybe"
 
 import type { DeclaredFlag } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
@@ -18,7 +17,6 @@ export readArgs = (legend, raw) => pipe(
   Declared.validate(legend),
   Either.mapLeft(Print.printIssues),
 )(raw)
-
 export helpWithColor = (useColor, flags) => {
   fn = useColor ? Print.printLegendWithColor : Print.printLegend
   return "TEENAGE MUTANT PIZZA MATIC" ++ fn(flags)

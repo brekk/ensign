@@ -2,18 +2,14 @@ import type { Maybe } from "Maybe"
 
 import type { Flag } from "@/Flags"
 
-import Dict from "Dictionary"
 import Either from "Either"
-import Fn from "Function"
 import IO from "IO"
 import List from "List"
 import { Just, Nothing } from "Maybe"
 
-import { validate } from "@/Declared"
 import { flagBoolean, flagString } from "@/Declared/Flags"
 import Ensign from "@/Ensign"
-import { Flag, FlagToggle, parseFlags } from "@/Flags"
-import { without } from "@/List"
+import { Flag, FlagToggle } from "@/Flags"
 
 
 
@@ -26,7 +22,6 @@ PIZZA_FLAGS = [
   flagString("topping", ["t"], "What topping(s) do you want?"),
   flagString("size", ["s"], "What size pizza should this be?"),
 ]
-
 alias PizzaOrder = {
   base :: Maybe String,
   cheese :: Maybe String,
@@ -46,8 +41,6 @@ INITIAL_STATE = {
   toppings: [],
   size: Just(3),
 }
-
-
 captureTheFlag :: PizzaOrder -> Flag -> #[Boolean, PizzaOrder]
 captureTheFlag = (state, flag) => where(flag) {
   Flag(k, v) =>
@@ -78,7 +71,6 @@ captureTheFlag = (state, flag) => where(flag) {
   _ =>
     #[false, state]
 }
-
 processFlagState :: PizzaOrder
   -> (PizzaOrder -> Flag -> #[Boolean, PizzaOrder])
   -> List Flag
@@ -100,7 +92,6 @@ processFlagState = (state, process, flags) => {
   }
   return walker(false, state, flags)
 }
-
 main = (args) => {
   pipe(
     /* drop the first value, that's the name of this file */

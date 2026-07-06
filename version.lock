@@ -1,18 +1,142 @@
 {
-  "buildHash": "9bc7f4b8295edccad198523f67607f22",
+  "buildHash": "0f0378f47498bd54c731a02fce7ef6d6",
   "jsApi": {
     "apiInstances": [],
-    "apiAliases": {},
+    "apiAliases": {
+      "src/Declared/Print.mad#DeclarationRenderer": "(String -> String -> List String -> String -> String)",
+      "src/Declared.mad#ParsedValidation": "{ flags :: List Flag, issues :: List Invalid }"
+    },
     "apiInterfaces": {},
-    "apiNames": {},
-    "apiTypes": {}
+    "apiNames": {
+      "readArgs": "List DeclaredFlag -> List String -> Either String (List Flag)",
+      "src/Flags.mad#isFlag": "String -> Boolean",
+      "src/String.mad#splitLowerKebab": "Fission",
+      "src/String.mad#camelToKebab": "String -> String",
+      "src/String.mad#lowerKebab": "Pair",
+      "src/String.mad#camelToFlag": "String -> String",
+      "src/Flags.mad#preParseFlags": "List String -> List (List String)",
+      "src/Declared/Print.mad#printMarkdownLegend": "List DeclaredFlag -> String",
+      "helpWithColor": "Boolean -> List DeclaredFlag -> String",
+      "src/Declared/Flags.mad#flagBoolean": "String -> List String -> String -> DeclaredFlag",
+      "src/String.mad#kebabToCamel": "String -> String",
+      "src/Flags.mad#on": "String -> Flag",
+      "src/String.mad#flagToCamel": "String -> String",
+      "src/Declared.mad#_validator": "(String -> Maybe #[FlagKind, a, String]) -> { flags :: List Flag, issues :: List Invalid } -> Flag -> { flags :: List Flag, issues :: List Invalid }",
+      "src/Declared/Print.mad#printLegendWithColor": "List DeclaredFlag -> String",
+      "src/Flags.mad#_splitJointFlags": "String -> List String",
+      "src/Log.mad#tags": "{ detail :: Tag, detailStack :: Tag, detailStackDebug :: Tag, ensign :: Tag, error :: Tag, flag :: Tag, flagBoolean :: Tag, flagParse :: Tag, flagStack :: Tag, flagString :: Tag, tag :: Tag, validate :: Tag }",
+      "src/Declared/Print.mad#printIssues": "List Invalid -> String",
+      "src/Log.mad#env": "(Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l) => { detail :: String -> f -> f, detailStack :: String -> e -> e, detailStackDebug :: String -> d -> d, ensign :: String -> l -> l, error :: String -> c -> c, flag :: String -> k -> k, flagBoolean :: String -> i -> i, flagParse :: String -> j -> j, flagStack :: String -> g -> g, flagString :: String -> h -> h, tag :: String -> b -> b, validate :: String -> a -> a }",
+      "src/Declared/Print.mad#printWithRenderer": "(String -> String -> List String -> String -> String) -> List DeclaredFlag -> String",
+      "src/Declared.mad#check": "List DeclaredFlag -> Maybe (List Flag) -> { flags :: List Flag, issues :: List Invalid }",
+      "src/Flags.mad#isShortFlag": "String -> Boolean",
+      "src/String.mad#stripQuotes": "String -> String",
+      "src/Flags.mad#off": "String -> Flag",
+      "src/Flags.mad#isNegatedFlag": "String -> Boolean",
+      "src/Declared/Print.mad#printLegend": "List DeclaredFlag -> String",
+      "src/Flags.mad#parseFlags": "List String -> Maybe (List Flag)",
+      "src/Declared.mad#validate": "List DeclaredFlag -> Maybe (List Flag) -> Either (List Invalid) (List Flag)",
+      "src/Declared/Print.mad#flagify": "String -> String",
+      "src/Flags.mad#noneAreFlags": "List String -> Boolean",
+      "src/String.mad#_translate": "Boolean -> String -> String",
+      "src/Flags.mad#isLongFlag": "String -> Boolean",
+      "src/String.mad#hasCapitals": "String -> Boolean",
+      "src/Flags.mad#isNotFlag": "String -> Boolean",
+      "src/Log.mad#tapped": "(Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l) => { detail :: String -> (m -> f) -> m -> m, detailStack :: String -> (n -> e) -> n -> n, detailStackDebug :: String -> (o -> d) -> o -> o, ensign :: String -> (p -> l) -> p -> p, error :: String -> (q -> c) -> q -> q, flag :: String -> (r -> k) -> r -> r, flagBoolean :: String -> (s -> i) -> s -> s, flagParse :: String -> (t -> j) -> t -> t, flagStack :: String -> (u -> g) -> u -> u, flagString :: String -> (v -> h) -> v -> v, tag :: String -> (w -> b) -> w -> w, validate :: String -> (x -> a) -> x -> x }",
+      "src/Declared/Flags.mad#flagString": "String -> List String -> String -> DeclaredFlag",
+      "src/String.mad#joinLowerKebab": "Fusion",
+      "src/Flags.mad#allAreFlags": "List String -> Boolean",
+      "src/Flags.mad#flagSlug": "String -> String"
+    },
+    "apiTypes": {
+      "src/Declared/Flags.mad#Invalid": [
+        "ExpectedBoolean String",
+        "ExpectedString String",
+        "UnexpectedFlag String",
+        "Unparseable"
+      ],
+      "src/Declared/Flags.mad#DeclaredFlag": [
+        "DeclaredFlag FlagKind String (List String) String"
+      ],
+      "src/Declared/Flags.mad#FlagKind": [
+        "FString",
+        "FBoolean"
+      ],
+      "src/Flags.mad#Flag": [
+        "FlagToggle String Boolean",
+        "Flag String String",
+        "InvalidFlag"
+      ]
+    }
   },
   "llvmApi": {
     "apiInstances": [],
-    "apiAliases": {},
+    "apiAliases": {
+      "src/Declared/Print.mad#DeclarationRenderer": "(String -> String -> List String -> String -> String)",
+      "src/Declared.mad#ParsedValidation": "{ flags :: List Flag, issues :: List Invalid }"
+    },
     "apiInterfaces": {},
-    "apiNames": {},
-    "apiTypes": {}
+    "apiNames": {
+      "readArgs": "List DeclaredFlag -> List String -> Either String (List Flag)",
+      "src/Flags.mad#isFlag": "String -> Boolean",
+      "src/String.mad#splitLowerKebab": "Fission",
+      "src/String.mad#camelToKebab": "String -> String",
+      "src/String.mad#lowerKebab": "Pair",
+      "src/String.mad#camelToFlag": "String -> String",
+      "src/Flags.mad#preParseFlags": "List String -> List (List String)",
+      "src/Declared/Print.mad#printMarkdownLegend": "List DeclaredFlag -> String",
+      "helpWithColor": "Boolean -> List DeclaredFlag -> String",
+      "src/Declared/Flags.mad#flagBoolean": "String -> List String -> String -> DeclaredFlag",
+      "src/String.mad#kebabToCamel": "String -> String",
+      "src/Flags.mad#on": "String -> Flag",
+      "src/String.mad#flagToCamel": "String -> String",
+      "src/Declared.mad#_validator": "(String -> Maybe #[FlagKind, a, String]) -> { flags :: List Flag, issues :: List Invalid } -> Flag -> { flags :: List Flag, issues :: List Invalid }",
+      "src/Declared/Print.mad#printLegendWithColor": "List DeclaredFlag -> String",
+      "src/Flags.mad#_splitJointFlags": "String -> List String",
+      "src/Log.mad#tags": "{ detail :: Tag, detailStack :: Tag, detailStackDebug :: Tag, ensign :: Tag, error :: Tag, flag :: Tag, flagBoolean :: Tag, flagParse :: Tag, flagStack :: Tag, flagString :: Tag, tag :: Tag, validate :: Tag }",
+      "src/Declared/Print.mad#printIssues": "List Invalid -> String",
+      "src/Log.mad#env": "(Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l) => { detail :: String -> f -> f, detailStack :: String -> e -> e, detailStackDebug :: String -> d -> d, ensign :: String -> l -> l, error :: String -> c -> c, flag :: String -> k -> k, flagBoolean :: String -> i -> i, flagParse :: String -> j -> j, flagStack :: String -> g -> g, flagString :: String -> h -> h, tag :: String -> b -> b, validate :: String -> a -> a }",
+      "src/Declared/Print.mad#printWithRenderer": "(String -> String -> List String -> String -> String) -> List DeclaredFlag -> String",
+      "src/Declared.mad#check": "List DeclaredFlag -> Maybe (List Flag) -> { flags :: List Flag, issues :: List Invalid }",
+      "src/Flags.mad#isShortFlag": "String -> Boolean",
+      "src/String.mad#stripQuotes": "String -> String",
+      "src/Flags.mad#off": "String -> Flag",
+      "src/Flags.mad#isNegatedFlag": "String -> Boolean",
+      "src/Declared/Print.mad#printLegend": "List DeclaredFlag -> String",
+      "src/Flags.mad#parseFlags": "List String -> Maybe (List Flag)",
+      "src/Declared.mad#validate": "List DeclaredFlag -> Maybe (List Flag) -> Either (List Invalid) (List Flag)",
+      "src/Declared/Print.mad#flagify": "String -> String",
+      "src/Flags.mad#noneAreFlags": "List String -> Boolean",
+      "src/String.mad#_translate": "Boolean -> String -> String",
+      "src/Flags.mad#isLongFlag": "String -> Boolean",
+      "src/String.mad#hasCapitals": "String -> Boolean",
+      "src/Flags.mad#isNotFlag": "String -> Boolean",
+      "src/Log.mad#tapped": "(Show a, Show b, Show c, Show d, Show e, Show f, Show g, Show h, Show i, Show j, Show k, Show l) => { detail :: String -> (m -> f) -> m -> m, detailStack :: String -> (n -> e) -> n -> n, detailStackDebug :: String -> (o -> d) -> o -> o, ensign :: String -> (p -> l) -> p -> p, error :: String -> (q -> c) -> q -> q, flag :: String -> (r -> k) -> r -> r, flagBoolean :: String -> (s -> i) -> s -> s, flagParse :: String -> (t -> j) -> t -> t, flagStack :: String -> (u -> g) -> u -> u, flagString :: String -> (v -> h) -> v -> v, tag :: String -> (w -> b) -> w -> w, validate :: String -> (x -> a) -> x -> x }",
+      "src/Declared/Flags.mad#flagString": "String -> List String -> String -> DeclaredFlag",
+      "src/String.mad#joinLowerKebab": "Fusion",
+      "src/Flags.mad#allAreFlags": "List String -> Boolean",
+      "src/Flags.mad#flagSlug": "String -> String"
+    },
+    "apiTypes": {
+      "src/Declared/Flags.mad#Invalid": [
+        "ExpectedBoolean String",
+        "ExpectedString String",
+        "UnexpectedFlag String",
+        "Unparseable"
+      ],
+      "src/Declared/Flags.mad#DeclaredFlag": [
+        "DeclaredFlag FlagKind String (List String) String"
+      ],
+      "src/Declared/Flags.mad#FlagKind": [
+        "FString",
+        "FBoolean"
+      ],
+      "src/Flags.mad#Flag": [
+        "FlagToggle String Boolean",
+        "Flag String String",
+        "InvalidFlag"
+      ]
+    }
   },
   "versionHash": "25e64aa754c310d45c1e084d574c1bb0"
 }

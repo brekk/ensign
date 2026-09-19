@@ -1,5 +1,5 @@
-/* ★★★ ensign@0.0.16 ★★★
- * THIS FILE AUTOMATICALLY GENERATED FROM SOURCE: ensign.clowncar
+/* ★★★ ensign@0.1.2 ★★★
+ * THIS FILE AUTOMATICALLY GENERATED FROM SOURCE: ensign.clown-car
  */
 
 import Party from "PartyBus"

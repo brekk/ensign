@@ -1,0 +1,26 @@
+import String from "String"
+import Term from "Terminal"
+
+import Print from "@/Declared/Print"
+
+
+
+ENTITIES = { LEFT_ROUND: "", RIGHT_ROUND: "", LEFT_SHARP: "◄", RIGHT_SHARP: "►" }
+_bookends = (ab, ba, a, z, m) => ab(a) ++ ba(m) ++ ab(z)
+magicblack = _bookends(
+  Term.ansiColor([Term.ansi.BGBlack, Term.ansi.FGMagenta]),
+  Term.ansiColor([Term.ansi.FGBlack, Term.ansi.BGMagenta]),
+)
+export rounded = (useColor, x) => useColor
+  ? magicblack(ENTITIES.LEFT_ROUND, ENTITIES.RIGHT_ROUND, x)
+  : x
+export renderHelpWithStyle = (style, { preface, useColor, name, description }, flags) => {
+  fn = (useColor ? Print.printLegendWithColor : Print.printLegend)
+  return (String.isEmpty(preface) ? "" : preface ++ "\n")
+    ++ style(useColor, name)
+    ++ "\n"
+    ++ description
+    ++ "\n"
+    ++ fn(flags)
+}
+export renderRoundedHelp = renderHelpWithStyle(rounded)

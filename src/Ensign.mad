@@ -4,20 +4,25 @@ import type { DeclaredFlag } from "@/Declared/Flags"
 import type { Flag } from "@/Flags"
 
 import Either from "Either"
+import String from "String"
 
 import Declared from "@/Declared"
 import Print from "@/Declared/Print"
 import Flags from "@/Flags"
+import Log from "@/Log"
 
 
 
 readArgs :: List DeclaredFlag -> List String -> Either String (List Flag)
 export readArgs = (legend, raw) => pipe(
+  Log.env.flag("Raw flags"),
   Flags.parseFlags,
+  Log.env.flagParse("Parsed flags"),
   Declared.validate(legend),
+  Log.env.flagParse("validation"),
   Either.mapLeft(Print.printIssues),
 )(raw)
 export helpWithColor = (useColor, flags) => {
   fn = useColor ? Print.printLegendWithColor : Print.printLegend
-  return "TEENAGE MUTANT PIZZA MATIC" ++ fn(flags)
+  return fn(flags)
 }

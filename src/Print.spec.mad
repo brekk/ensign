@@ -1,0 +1,49 @@
+import String from "String"
+
+import Study from "Study"
+
+import { renderHelpWithStyle, renderRoundedHelp, rounded } from "@/Print"
+
+
+
+stripAnsi = String.replace("\\u001b\\[[0-9;]*m", "")
+Study.report(
+  pipe(
+    rounded(true),
+    stripAnsi,
+  ),
+  "rounded, with color",
+  [#["cool", "cool"]],
+)
+Study.report(
+  pipe(
+    rounded(false),
+    stripAnsi,
+  ),
+  "rounded, no color",
+  [#["cool", "cool"]],
+)
+Study.report(
+  renderHelpWithStyle(
+    (_, x) => x ++ x,
+    { preface: "cool", useColor: false, name: "test", description: "◆◆◆" },
+  ),
+  "renderHelpWithStyle: prefaced",
+  [#[[], "cool\ntesttest\n◆◆◆\n"]],
+)
+Study.report(
+  renderHelpWithStyle(
+    (_, x) => x ++ x,
+    { preface: "", useColor: true, name: "test", description: "◆◆◆" },
+  ),
+  "renderHelpWithStyle: no preface",
+  [#[[], "testtest\n◆◆◆\n"]],
+)
+Study.report(
+  pipe(
+    renderRoundedHelp({ preface: "", useColor: true, name: "test", description: "◆◆◆" }),
+    stripAnsi,
+  ),
+  "renderRoundedHelp",
+  [#[[], "test\n◆◆◆\n"]],
+)
